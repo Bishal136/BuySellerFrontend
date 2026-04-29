@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://buysellerbackend-com.onrender.com',
         changeOrigin: true,
       },
     },
