@@ -1,44 +1,46 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { CATEGORY_PLACEHOLDER } from '../../utils/placeholder';
 
-const CategoryCard = ({ category }) => {
+const colorSchemes = [
+  'from-orange-100 to-orange-50',
+  'from-pink-100 to-pink-50',
+  'from-blue-100 to-blue-50',
+  'from-purple-100 to-purple-50',
+  'from-green-100 to-green-50',
+  'from-yellow-100 to-yellow-50'
+];
+
+const CategoryCard = ({ category, index = 0 }) => {
+  const colorClass = colorSchemes[index % colorSchemes.length];
+  
   return (
     <motion.div
-      whileHover={{ y: -5, scale: 1.05 }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
       className="group"
     >
       <Link to={`/products?category=${category.slug || category._id}`}>
-        <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300">
-          {/* Category Image */}
-          <div className="relative h-40 overflow-hidden bg-gray-100">
-            <img
-              src={category.image || CATEGORY_PLACEHOLDER}
-              alt={category.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = CATEGORY_PLACEHOLDER;
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-          </div>
-          
-          {/* Category Info */}
-          <div className="p-4 text-center">
-            {category.icon && (
-              <div className="text-3xl mb-2">{category.icon}</div>
-            )}
-            <h3 className="font-semibold text-gray-800 group-hover:text-primary-600 transition-colors">
-              {category.name}
-            </h3>
-            {category.productCount !== undefined && (
-              <p className="text-sm text-gray-500 mt-1">
-                {category.productCount} Products
-              </p>
+        <div className="flex flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white p-3 text-center transition-all hover:-translate-y-1 hover:border-primary-300 hover:shadow-lg bg-white">
+          <div
+            className={`grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br ${colorClass} text-gray-700 group-hover:scale-110 transition-transform`}
+          >
+            {category.icon ? (
+              <span className="text-2xl">{category.icon}</span>
+            ) : (
+              <span className="text-lg font-bold">
+                {category.name.charAt(0).toUpperCase()}
+              </span>
             )}
           </div>
+          <span className="text-xs font-medium leading-tight text-gray-700">
+            {category.name}
+          </span>
+          {category.productCount !== undefined && (
+            <span className="text-xs text-gray-400">
+              {category.productCount} items
+            </span>
+          )}
         </div>
       </Link>
     </motion.div>

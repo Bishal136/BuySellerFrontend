@@ -221,7 +221,7 @@ const SellerProducts = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{product.sku || 'N/A'}</td>
-                      <td className="px-6 py-4 font-semibold text-gray-800">${product.price?.toFixed(2)}</td>
+                      <td className="px-6 py-4 font-semibold text-gray-800">BDT {product.price?.toFixed(2)}</td>
                       <td className="px-6 py-4">
                         <span className={`font-semibold ${product.stock === 0 ? 'text-red-600' : 'text-gray-800'}`}>
                           {product.stock}

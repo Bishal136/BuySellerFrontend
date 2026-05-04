@@ -1,32 +1,39 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FiMapPin, FiPackage, FiCreditCard, FiCheck, 
+import { useNavigate, useLocation } from 'react-router-dom';
+import {
+  FiMapPin, FiPackage, FiCreditCard, FiCheck,
   FiArrowLeft, FiArrowRight, FiTruck, FiShield,
-  FiSmartphone, FiDollarSign
+  FiSmartphone, FiDollarSign, FiUser, FiPhone,
+  FiTag, FiChevronDown, FiChevronUp, FiEdit2
 } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
-import { fetchCart } from '../redux/slices/cartSlice';
+import { clearCart } from '../redux/slices/cartSlice';
 import api from '../services/api';
+import { formatBDT } from '../utils/currency';
 
 const CheckoutPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
-  const { items, subtotal, discount, tax, shippingCost, total } = useSelector((state) => state.cart);
-  
-  const [step, setStep] = useState(1);
+
+  const [selectedCheckoutItems, setSelectedCheckoutItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [showAddressForm, setShowAddressForm] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('');
-  const [bkashNumber, setBkashNumber] = useState('');
-  const [nagadNumber, setNagadNumber] = useState('');
-  const [orderId, setOrderId] = useState(null);
-  const [paymentModal, setPaymentModal] = useState({ show: false, type: '', data: null });
+  const [showAddressSelect, setShowAddressSelect] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('cash_on_delivery');
+  const [deliveryDate, setDeliveryDate] = useState(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({ shipping: true });
+  const [collectionPoints, setCollectionPoints] = useState([]);
+  const [selectedCollectionPoint, setSelectedCollectionPoint] = useState(null);
+  const [showCollectionPoints, setShowCollectionPoints] = useState(false);
+  const [isBuyNow, setIsBuyNow] = useState(false);
 
   const [newAddress, setNewAddress] = useState({
     name: user?.name || '',
@@ -39,17 +46,70 @@ const CheckoutPage = () => {
     email: user?.email || ''
   });
 
+
+  useEffect(() => {
+    console.log('=== CHECKOUT PAGE MOUNTED ===');
+    console.log('Location state:', location.state);
+
+    // Handle Buy Now item first
+    if (location.state?.buyNowItem) {
+      console.log('Buy Now item:', location.state.buyNowItem);
+      setSelectedCheckoutItems([location.state.buyNowItem]);
+      setIsBuyNow(true);
+    }
+    else if (location.state?.selectedItems) {
+      console.log('Selected items from cart:', location.state.selectedItems);
+      setSelectedCheckoutItems(location.state.selectedItems);
+      setIsBuyNow(false);
+    }
+    else {
+      console.log('No items found - redirecting to cart');
+      toast.error('No items selected for checkout');
+      navigate('/cart');
+    }
+  }, [location.state, navigate]);
+
+  // Group items by seller
+  const groupedItems = selectedCheckoutItems.reduce((groups, item) => {
+    const sellerName = item.sellerName || item.seller?.storeName || 'Other Sellers';
+    const sellerId = item.sellerId || item.seller?._id || 'other';
+
+    if (!groups[sellerId]) {
+      groups[sellerId] = {
+        sellerId,
+        sellerName,
+        items: [],
+        subtotal: 0,
+        shippingFee: 110
+      };
+    }
+    groups[sellerId].items.push(item);
+    groups[sellerId].subtotal += item.price * item.quantity;
+    return groups;
+  }, {});
+
+  const selectedSubtotal = selectedCheckoutItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const selectedItemsCount = selectedCheckoutItems.length;
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
-    if (items.length === 0) {
-      navigate('/cart');
+    if (selectedCheckoutItems.length === 0) {
       return;
     }
     fetchAddresses();
-  }, [isAuthenticated, items]);
+    calculateDeliveryDate();
+    fetchCollectionPoints();
+  }, [isAuthenticated, selectedCheckoutItems]);
+
+  const calculateDeliveryDate = () => {
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 5);
+    setDeliveryDate({ start: startDate, end: endDate });
+  };
 
   const fetchAddresses = async () => {
     try {
@@ -66,8 +126,27 @@ const CheckoutPage = () => {
     }
   };
 
+  const fetchCollectionPoints = async () => {
+    setCollectionPoints([
+      {
+        id: 1,
+        name: 'Click N Pick Collection Point',
+        address: 'House #12, Road #5, Sector #6, Uttara, Dhaka-1230',
+        distance: '1.2 km',
+        fee: 0
+      },
+      {
+        id: 2,
+        name: 'Daraz Collection Point - Gulshan',
+        address: 'Gulshan 2, Dhaka-1212',
+        distance: '3.5 km',
+        fee: 50
+      }
+    ]);
+  };
+
   const handleAddAddress = async () => {
-    if (!newAddress.street || !newAddress.city || !newAddress.state || !newAddress.postalCode) {
+    if (!newAddress.street || !newAddress.city || !newAddress.state || !newAddress.postalCode || !newAddress.phone) {
       toast.error('Please fill all address fields');
       return;
     }
@@ -77,6 +156,7 @@ const CheckoutPage = () => {
       setAddresses(response.data.addresses);
       setSelectedAddress(response.data.addresses[response.data.addresses.length - 1]);
       setShowAddressForm(false);
+      setShowAddressSelect(false);
       setNewAddress({
         name: user?.name || '',
         street: '',
@@ -93,527 +173,351 @@ const CheckoutPage = () => {
     }
   };
 
-  const createOrder = async () => {
-    setLoading(true);
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error('Please enter a coupon code');
+      return;
+    }
+
+    setApplyingCoupon(true);
     try {
+      if (couponCode.toUpperCase() === 'SAVE10') {
+        setAppliedCoupon({
+          code: 'SAVE10',
+          discount: selectedSubtotal * 0.1,
+          type: 'percentage',
+          value: 10
+        });
+        toast.success('Coupon applied successfully!');
+      } else {
+        toast.error('Invalid coupon code');
+      }
+      setCouponCode('');
+    } catch (error) {
+      toast.error('Failed to apply coupon');
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    toast.success('Coupon removed');
+  };
+
+  const getTotalPrice = () => {
+    let total = selectedSubtotal;
+    Object.values(groupedItems).forEach(group => {
+      total += group.shippingFee;
+    });
+    if (appliedCoupon) {
+      total -= appliedCoupon.discount;
+    }
+    return total;
+  };
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+
+  const placeOrder = async () => {
+    if (!selectedAddress && !selectedCollectionPoint) {
+      toast.error('Please select a shipping address or collection point');
+      return;
+    }
+
+    if (selectedCheckoutItems.length === 0) {
+      toast.error('No items to checkout');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const orderItemsList = [];
+
+      for (const group of Object.values(groupedItems)) {
+        for (const item of group.items) {
+          const sellerId = item.sellerId || item.seller?._id;
+
+          if (!sellerId) {
+            console.error('Missing seller ID for item:', item);
+            toast.error(`Missing seller information for ${item.name}`);
+            setLoading(false);
+            return;
+          }
+
+          orderItemsList.push({
+            product: item.productId || item.product?._id,
+            name: item.name,
+            image: item.image || '',
+            price: Number(item.price),
+            quantity: Number(item.quantity),
+            seller: sellerId
+          });
+        }
+      }
+
+      let shippingFee = 0;
+      Object.values(groupedItems).forEach(group => {
+        shippingFee += group.shippingFee;
+      });
+
       const orderData = {
-        shippingAddress: selectedAddress,
         paymentMethod: paymentMethod,
-        orderItems: items.map(item => ({
-          product: item.productId || item.product?._id,
-          name: item.name,
-          image: item.image,
-          price: item.price,
-          quantity: item.quantity,
-          seller: item.seller
-        })),
-        itemsPrice: subtotal,
-        taxPrice: tax,
-        shippingPrice: shippingCost,
-        discountPrice: discount,
-        totalPrice: total,
-        coupon: null,
+        orderItems: orderItemsList,
+        itemsPrice: Number(selectedSubtotal),
+        taxPrice: 0,
+        shippingPrice: selectedCollectionPoint ? (selectedCollectionPoint.fee || 0) : shippingFee,
+        discountPrice: appliedCoupon ? Number(appliedCoupon.discount) : 0,
         notes: ''
       };
 
+      if (selectedAddress && !selectedCollectionPoint) {
+        orderData.shippingAddress = {
+          name: selectedAddress.name,
+          street: selectedAddress.street,
+          city: selectedAddress.city,
+          state: selectedAddress.state,
+          postalCode: selectedAddress.postalCode,
+          country: selectedAddress.country || 'Bangladesh',
+          phone: selectedAddress.phone,
+          email: selectedAddress.email || user?.email
+        };
+      }
+
+      if (selectedCollectionPoint) {
+        orderData.collectionPoint = {
+          name: selectedCollectionPoint.name,
+          address: selectedCollectionPoint.address,
+          fee: selectedCollectionPoint.fee
+        };
+      }
+
+      console.log('Sending order data:', JSON.stringify(orderData, null, 2));
+
       const response = await api.post('/orders/create', orderData);
-      setOrderId(response.data.order._id);
-      
-      if (paymentMethod === 'cash_on_delivery') {
-        await confirmCashOnDelivery(response.data.order._id);
-      } else if (paymentMethod === 'bkash') {
-        await initiateBkashPayment(response.data.order._id);
-      } else if (paymentMethod === 'nagad') {
-        await initiateNagadPayment(response.data.order._id);
+
+      if (response.data.success) {
+        toast.success('Order placed successfully!');
+
+        // ✅ For Buy Now, don't clear the cart (since item wasn't added to cart)
+        if (!isBuyNow) {
+          await dispatch(clearCart());
+        }
+
+        navigate(`/order-success/${response.data.order._id}`);
+      } else {
+        toast.error(response.data.message || 'Failed to place order');
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to create order');
+      console.error('Order placement error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to place order';
+      toast.error(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
 
-  const initiateBkashPayment = async (orderId) => {
-    try {
-      const response = await api.post('/payment/bkash/init', {
-        orderId: orderId,
-        amount: total
-      });
-      
-      setPaymentModal({
-        show: true,
-        type: 'bkash',
-        data: response.data
-      });
-      setLoading(false);
-    } catch (error) {
-      toast.error('Failed to initiate bKash payment');
-      setLoading(false);
-    }
-  };
 
-  const confirmBkashPayment = async () => {
-    setLoading(true);
-    try {
-      const transactionId = document.getElementById('transactionId').value;
-      if (!transactionId) {
-        toast.error('Please enter transaction ID');
-        setLoading(false);
-        return;
-      }
-
-      await api.post('/payment/bkash/confirm', {
-        orderId: orderId,
-        paymentId: paymentModal.data.paymentId,
-        transactionId: transactionId
-      });
-
-      setPaymentModal({ show: false, type: '', data: null });
-      navigate(`/order-success/${orderId}`);
-    } catch (error) {
-      toast.error('Payment confirmation failed');
-      setLoading(false);
-    }
-  };
-
-  const initiateNagadPayment = async (orderId) => {
-    try {
-      const response = await api.post('/payment/nagad/init', {
-        orderId: orderId,
-        amount: total
-      });
-      
-      setPaymentModal({
-        show: true,
-        type: 'nagad',
-        data: response.data
-      });
-      setLoading(false);
-    } catch (error) {
-      toast.error('Failed to initiate Nagad payment');
-      setLoading(false);
-    }
-  };
-
-  const confirmNagadPayment = async () => {
-    setLoading(true);
-    try {
-      const transactionId = document.getElementById('transactionId').value;
-      if (!transactionId) {
-        toast.error('Please enter transaction ID');
-        setLoading(false);
-        return;
-      }
-
-      await api.post('/payment/nagad/confirm', {
-        orderId: orderId,
-        paymentId: paymentModal.data.paymentId,
-        transactionId: transactionId
-      });
-
-      setPaymentModal({ show: false, type: '', data: null });
-      navigate(`/order-success/${orderId}`);
-    } catch (error) {
-      toast.error('Payment confirmation failed');
-      setLoading(false);
-    }
-  };
-
-  const confirmCashOnDelivery = async (orderId) => {
-    try {
-      await api.post('/payment/cod/confirm', { orderId });
-      navigate(`/order-success/${orderId}`);
-    } catch (error) {
-      toast.error('Failed to place order');
-      setLoading(false);
-    }
-  };
-
-  const nextStep = () => {
-    if (step === 1 && !selectedAddress) {
-      toast.error('Please select or add a shipping address');
-      return;
-    }
-    if (step === 2 && !paymentMethod) {
-      toast.error('Please select a payment method');
-      return;
-    }
-    if (step === 2) {
-      createOrder();
-    } else {
-      setStep(step + 1);
-    }
-  };
-
-  const prevStep = () => {
-    setStep(step - 1);
-  };
-
-  const paymentMethods = [
-    { id: 'bkash', name: 'bKash', icon: <FiSmartphone />, color: 'bg-pink-500' },
-    { id: 'nagad', name: 'Nagad', icon: <FiSmartphone />, color: 'bg-red-500' },
-    { id: 'cash_on_delivery', name: 'Cash on Delivery', icon: <FiDollarSign />, color: 'bg-green-500' }
-  ];
-
-  return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        {/* Progress Steps */}
-        <div className="max-w-3xl mx-auto mb-8">
-          <div className="flex justify-between items-center">
-            {[
-              { step: 1, title: 'Shipping', icon: FiMapPin },
-              { step: 2, title: 'Payment', icon: FiCreditCard },
-              { step: 3, title: 'Confirmation', icon: FiCheck }
-            ].map((s) => (
-              <div key={s.step} className="flex-1 relative">
-                <div className="flex flex-col items-center">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                    step >= s.step 
-                      ? 'bg-primary-600 border-primary-600 text-white' 
-                      : 'bg-white border-gray-300 text-gray-400'
-                  }`}>
-                    <s.icon className="w-5 h-5" />
-                  </div>
-                  <div className="text-sm font-medium mt-2">{s.title}</div>
-                </div>
-                {s.step < 3 && (
-                  <div className={`absolute top-6 left-1/2 w-full h-0.5 transition-all duration-300 ${
-                    step > s.step ? 'bg-primary-600' : 'bg-gray-300'
-                  }`} />
-                )}
-              </div>
-            ))}
+  if (selectedCheckoutItems.length === 0 && location.state?.selectedItems === undefined) {
+    return (
+      <div className="bg-gray-100 min-h-screen py-6">
+        <div className="container mx-auto px-4">
+          <div className="bg-white rounded-lg p-8 text-center">
+            <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading checkout...</p>
           </div>
         </div>
+      </div>
+    );
+  }
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <AnimatePresence mode="wait">
-                {/* Step 1: Shipping Address */}
-                {step === 1 && (
-                  <motion.div
-                    key="shipping"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                  >
-                    <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
-                    
-                    {/* Existing Addresses */}
-                    {addresses.length > 0 && (
-                      <div className="space-y-3 mb-6">
-                        {addresses.map((addr, idx) => (
-                          <label key={idx} className="flex items-start p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
-                            <input
-                              type="radio"
-                              name="address"
-                              checked={selectedAddress?._id === addr._id}
-                              onChange={() => setSelectedAddress(addr)}
-                              className="mt-1 mr-3"
-                            />
-                            <div className="flex-1">
-                              <p className="font-semibold">{addr.name}</p>
-                              <p className="text-sm text-gray-600">{addr.street}</p>
-                              <p className="text-sm text-gray-600">
-                                {addr.city}, {addr.state} {addr.postalCode}
-                              </p>
-                              <p className="text-sm text-gray-600">{addr.country}</p>
-                              <p className="text-sm text-gray-600">Phone: {addr.phone}</p>
-                            </div>
-                          </label>
-                        ))}
-                      </div>
-                    )}
+  if (selectedCheckoutItems.length === 0) {
+    return (
+      <div className="bg-gray-100 min-h-screen py-6">
+        <div className="container mx-auto px-4">
+          <div className="bg-white rounded-lg p-8 text-center">
+            <h2 className="text-xl font-semibold mb-2">No Items Selected</h2>
+            <p className="text-gray-500 mb-6">Please select items from your cart to checkout.</p>
+            <button onClick={() => navigate('/cart')} className="bg-primary-600 text-white px-6 py-2 rounded-lg">
+              Go to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-                    {/* Add New Address Button */}
-                    {!showAddressForm ? (
-                      <button
-                        onClick={() => setShowAddressForm(true)}
-                        className="text-primary-600 hover:text-primary-700 font-medium"
-                      >
-                        + Add New Address
-                      </button>
-                    ) : (
-                      <div className="mt-4 space-y-4">
-                        <h3 className="font-semibold">New Address</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <input
-                            type="text"
-                            placeholder="Full Name"
-                            value={newAddress.name}
-                            onChange={(e) => setNewAddress({...newAddress, name: e.target.value})}
-                            className="input"
-                          />
-                          <input
-                            type="text"
-                            placeholder="Street Address"
-                            value={newAddress.street}
-                            onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
-                            className="input"
-                          />
-                          <input
-                            type="text"
-                            placeholder="City"
-                            value={newAddress.city}
-                            onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
-                            className="input"
-                          />
-                          <input
-                            type="text"
-                            placeholder="State"
-                            value={newAddress.state}
-                            onChange={(e) => setNewAddress({...newAddress, state: e.target.value})}
-                            className="input"
-                          />
-                          <input
-                            type="text"
-                            placeholder="Postal Code"
-                            value={newAddress.postalCode}
-                            onChange={(e) => setNewAddress({...newAddress, postalCode: e.target.value})}
-                            className="input"
-                          />
-                          <input
-                            type="text"
-                            placeholder="Phone"
-                            value={newAddress.phone}
-                            onChange={(e) => setNewAddress({...newAddress, phone: e.target.value})}
-                            className="input"
-                          />
+  return (
+    <div className="bg-gray-100 min-h-screen py-6">
+      <div className="container mx-auto px-4 max-w-6xl">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6">
+          <button onClick={() => navigate('/cart')} className="text-gray-600 hover:text-gray-800">
+            <FiArrowLeft className="w-6 h-6" />
+          </button>
+          <h1 className="text-2xl font-bold">Checkout ({selectedItemsCount} items)</h1>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Left Column - Checkout Form */}
+          <div className="flex-1 space-y-4">
+            {/* Shipping Section */}
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+              <button
+                onClick={() => toggleSection('shipping')}
+                className="w-full p-5 flex items-center justify-between hover:bg-gray-50"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <FiMapPin className="w-4 h-4 text-green-600" />
+                  </div>
+                  <span className="font-semibold text-lg">Shipping Address</span>
+                </div>
+                <FiChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${expandedSections.shipping ? 'rotate-180' : ''}`} />
+              </button>
+
+              {expandedSections.shipping && (
+                <div className="px-5 pb-5">
+                  {selectedAddress && !showAddressSelect && !showAddressForm ? (
+                    <div className="border rounded-lg p-4 bg-gray-50">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="font-semibold">{selectedAddress.name}</span>
+                            <span className="text-sm text-gray-500">{selectedAddress.phone}</span>
+                          </div>
+                          <p className="text-gray-600 text-sm">
+                            {selectedAddress.street}, {selectedAddress.city}, {selectedAddress.state}
+                          </p>
+                          <p className="text-gray-500 text-sm mt-1">{selectedAddress.country}</p>
                         </div>
-                        <div className="flex space-x-3">
-                          <button onClick={handleAddAddress} className="btn-primary">
-                            Save Address
-                          </button>
-                          <button onClick={() => setShowAddressForm(false)} className="btn-secondary">
-                            Cancel
-                          </button>
-                        </div>
+                        <button onClick={() => setShowAddressSelect(true)} className="text-primary-600 text-sm flex items-center gap-1">
+                          <FiEdit2 className="w-3 h-3" /> EDIT
+                        </button>
                       </div>
-                    )}
-                  </motion.div>
-                )}
-
-                {/* Step 2: Payment Method */}
-                {step === 2 && (
-                  <motion.div
-                    key="payment"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                  >
-                    <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
+                    </div>
+                  ) : (
                     <div className="space-y-3">
-                      {paymentMethods.map((method) => (
-                        <label
-                          key={method.id}
-                          className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all ${
-                            paymentMethod === method.id
-                              ? 'border-primary-600 bg-primary-50'
-                              : 'hover:bg-gray-50'
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="payment"
-                            value={method.id}
-                            checked={paymentMethod === method.id}
-                            onChange={(e) => setPaymentMethod(e.target.value)}
-                            className="mr-3"
-                          />
-                          <div className={`${method.color} w-10 h-10 rounded-full flex items-center justify-center text-white`}>
-                            {method.icon}
+                      {addresses.map((addr, idx) => (
+                        <label key={idx} className={`flex items-start p-4 border-2 rounded-lg cursor-pointer ${selectedAddress?._id === addr._id ? 'border-primary-500 bg-primary-50' : 'border-gray-200'}`}>
+                          <input type="radio" checked={selectedAddress?._id === addr._id} onChange={() => { setSelectedAddress(addr); setShowAddressSelect(false); }} className="mt-1 mr-3" />
+                          <div className="flex-1">
+                            <p className="font-semibold">{addr.name}</p>
+                            <p className="text-sm text-gray-600">{addr.street}</p>
+                            <p className="text-sm text-gray-600">{addr.city}, {addr.state}</p>
                           </div>
-                          <div className="ml-3 flex-1">
-                            <p className="font-semibold">{method.name}</p>
-                            {method.id === 'bkash' && (
-                              <p className="text-xs text-gray-500">Pay with bKash mobile banking</p>
-                            )}
-                            {method.id === 'nagad' && (
-                              <p className="text-xs text-gray-500">Pay with Nagad mobile banking</p>
-                            )}
-                            {method.id === 'cash_on_delivery' && (
-                              <p className="text-xs text-gray-500">Pay when you receive the order</p>
-                            )}
-                          </div>
-                          {paymentMethod === method.id && (
-                            <FiCheck className="text-primary-600 w-5 h-5" />
-                          )}
                         </label>
                       ))}
+                      <button onClick={() => setShowAddressForm(true)} className="w-full p-3 border-2 border-dashed rounded-lg text-primary-600 text-sm">
+                        + Add New Address
+                      </button>
                     </div>
+                  )}
+                </div>
+              )}
+            </div>
 
-                    {/* bKash Instructions */}
-                    {paymentMethod === 'bkash' && (
-                      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                        <p className="text-sm font-semibold text-blue-800">bKash Payment Instructions:</p>
-                        <ul className="text-sm text-blue-700 mt-2 space-y-1">
-                          <li>1. Go to your bKash app</li>
-                          <li>2. Select "Send Money"</li>
-                          <li>3. Enter merchant number: 017XXXXXXXX</li>
-                          <li>4. Enter the amount: ${total.toFixed(2)}</li>
-                          <li>5. Enter reference: ORDER-{orderId || 'XXXX'}</li>
-                          <li>6. Complete payment and enter transaction ID</li>
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Nagad Instructions */}
-                    {paymentMethod === 'nagad' && (
-                      <div className="mt-4 p-4 bg-red-50 rounded-lg">
-                        <p className="text-sm font-semibold text-red-800">Nagad Payment Instructions:</p>
-                        <ul className="text-sm text-red-700 mt-2 space-y-1">
-                          <li>1. Go to your Nagad app</li>
-                          <li>2. Select "Send Money"</li>
-                          <li>3. Enter merchant number: 018XXXXXXXX</li>
-                          <li>4. Enter the amount: ${total.toFixed(2)}</li>
-                          <li>5. Enter reference: ORDER-{orderId || 'XXXX'}</li>
-                          <li>6. Complete payment and enter transaction ID</li>
-                        </ul>
-                      </div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            {/* Promotion Section */}
+            <div className="bg-white rounded-lg shadow-sm p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <FiTag className="w-5 h-5 text-orange-500" />
+                <span className="font-semibold">Promotion</span>
+              </div>
+              <div className="flex gap-2">
+                <input type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder="Enter Coupon Code" className="flex-1 px-3 py-2 border rounded-lg text-sm" disabled={!!appliedCoupon} />
+                <button onClick={handleApplyCoupon} disabled={applyingCoupon || !!appliedCoupon} className="px-4 py-2 bg-gray-200 rounded-lg text-sm">
+                  {applyingCoupon ? '...' : 'APPLY'}
+                </button>
+              </div>
+              {appliedCoupon && (
+                <div className="mt-2 flex justify-between bg-green-50 p-2 rounded">
+                  <span className="text-sm text-green-700">Coupon {appliedCoupon.code} applied!</span>
+                  <button onClick={handleRemoveCoupon} className="text-red-500 text-xs">Remove</button>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Order Summary Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
-              <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
-              
-              <div className="space-y-3 max-h-96 overflow-y-auto mb-4">
-                {items.map((item) => (
-                  <div key={item._id} className="flex space-x-3">
-                    <img
-                      src={item.image || 'https://via.placeholder.com/60'}
-                      alt={item.name}
-                      className="w-16 h-16 object-cover rounded"
-                    />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium line-clamp-2">{item.name}</p>
-                      <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                      <p className="text-sm font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+          {/* Right Column - Order Summary */}
+          <div className="lg:w-96">
+            <div className="bg-white rounded-lg shadow-sm p-5 sticky top-24">
+              <h2 className="font-semibold text-lg mb-4">Order Summary</h2>
+
+              <div className="flex justify-between text-gray-600 mb-3">
+                <span>Items Total ({selectedItemsCount})</span>
+                <span>{formatBDT(selectedSubtotal)}</span>
+              </div>
+
+              {Object.entries(groupedItems).map(([sellerId, group]) => (
+                <div key={sellerId} className="border-t pt-3 mt-3">
+                  <p className="text-sm font-medium mb-2">{group.sellerName}</p>
+                  <div className="space-y-2">
+                    {group.items.map((item, idx) => (
+                      <div key={idx} className="flex gap-2">
+                        <img src={item.image || 'https://placehold.co/60x60'} alt="" className="w-12 h-12 object-cover rounded" />
+                        <div className="flex-1">
+                          <p className="text-xs">{item.name}</p>
+                          <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                          <p className="text-sm font-medium">{formatBDT(item.price)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between text-sm mt-2 pt-2 border-t">
+                    <span className="text-gray-500">Delivery Fee</span>
+                    <span>{formatBDT(group.shippingFee)}</span>
+                  </div>
+                </div>
+              ))}
+
+              <div className="border-t pt-3 mt-3">
+                <div className="flex justify-between font-bold text-lg">
+                  <span>Total:</span>
+                  <span className="text-primary-600">{formatBDT(getTotalPrice())}</span>
+                </div>
+              </div>
+
+              {/* Payment Method */}
+              <div className="mt-4">
+                <label className="font-medium text-sm block mb-2">Payment Method</label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer">
+                    <input type="radio" value="cash_on_delivery" checked={paymentMethod === 'cash_on_delivery'} onChange={(e) => setPaymentMethod(e.target.value)} className="w-4 h-4" />
+                    <FiDollarSign className="w-5 h-5 text-green-600" />
+                    <div>
+                      <p className="font-medium text-sm">Cash on Delivery</p>
+                      <p className="text-xs text-gray-500">Pay when you receive</p>
                     </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="border-t pt-4 space-y-2">
-                <div className="flex justify-between text-gray-600">
-                  <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
-                </div>
-                {discount > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Discount</span>
-                    <span>-${discount.toFixed(2)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-gray-600">
-                  <span>Shipping</span>
-                  <span>{shippingCost === 0 ? 'Free' : `$${shippingCost.toFixed(2)}`}</span>
-                </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Tax (10%)</span>
-                  <span>${tax.toFixed(2)}</span>
-                </div>
-                <div className="border-t pt-2 mt-2">
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span className="text-primary-600">${total.toFixed(2)}</span>
-                  </div>
+                  </label>
+                  <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer">
+                    <input type="radio" value="bkash" checked={paymentMethod === 'bkash'} onChange={(e) => setPaymentMethod(e.target.value)} className="w-4 h-4" />
+                    <FiSmartphone className="w-5 h-5 text-pink-600" />
+                    <div>
+                      <p className="font-medium text-sm">bKash</p>
+                      <p className="text-xs text-gray-500">Pay with bKash</p>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer">
+                    <input type="radio" value="nagad" checked={paymentMethod === 'nagad'} onChange={(e) => setPaymentMethod(e.target.value)} className="w-4 h-4" />
+                    <FiSmartphone className="w-5 h-5 text-red-600" />
+                    <div>
+                      <p className="font-medium text-sm">Nagad</p>
+                      <p className="text-xs text-gray-500">Pay with Nagad</p>
+                    </div>
+                  </label>
                 </div>
               </div>
 
-              {/* Navigation Buttons */}
-              <div className="mt-6 space-y-3">
-                {step > 1 && (
-                  <button onClick={prevStep} className="btn-secondary w-full flex items-center justify-center">
-                    <FiArrowLeft className="mr-2" /> Back
-                  </button>
-                )}
-                <button
-                  onClick={nextStep}
-                  disabled={loading}
-                  className="btn-primary w-full flex items-center justify-center"
-                >
-                  {loading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : step === 2 ? (
-                    <>Place Order <FiArrowRight className="ml-2" /></>
-                  ) : (
-                    <>Continue <FiArrowRight className="ml-2" /></>
-                  )}
-                </button>
-              </div>
-
-              {/* Security Badges */}
-              <div className="mt-4 pt-4 border-t text-center">
-                <div className="flex justify-center space-x-2 text-gray-500 text-xs">
-                  <FiShield className="w-4 h-4" />
-                  <span>Secure Payment</span>
-                  <FiTruck className="w-4 h-4 ml-2" />
-                  <span>Free Shipping over $50</span>
-                </div>
-              </div>
+              <button onClick={placeOrder} disabled={loading} className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold mt-5 disabled:opacity-50">
+                {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div> : 'Proceed to Pay'}
+              </button>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Payment Modal */}
-      {paymentModal.show && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-lg max-w-md w-full p-6"
-          >
-            <h2 className="text-xl font-semibold mb-4">
-              {paymentModal.type === 'bkash' ? 'bKash Payment' : 'Nagad Payment'}
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Please complete the payment and enter your transaction ID below.
-            </p>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Amount to Pay</label>
-                <input
-                  type="text"
-                  value={`$${paymentModal.data?.amount || total}`}
-                  disabled
-                  className="input bg-gray-100"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Transaction ID</label>
-                <input
-                  id="transactionId"
-                  type="text"
-                  placeholder="Enter transaction ID"
-                  className="input"
-                />
-              </div>
-              <button
-                onClick={paymentModal.type === 'bkash' ? confirmBkashPayment : confirmNagadPayment}
-                disabled={loading}
-                className="btn-primary w-full"
-              >
-                {loading ? 'Processing...' : 'Confirm Payment'}
-              </button>
-              <button
-                onClick={() => setPaymentModal({ show: false, type: '', data: null })}
-                className="btn-secondary w-full"
-              >
-                Cancel
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
     </div>
   );
 };

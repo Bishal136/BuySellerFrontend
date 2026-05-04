@@ -35,6 +35,7 @@ import SellerAnalytics from './pages/seller/Analytics';
 import SellerSettings from './pages/seller/Settings';
 import AddProduct from './pages/seller/AddProduct';
 import EditProduct from './pages/seller/EditProduct';
+import SellerShipping from './pages/seller/SellerShipping';
 
 // Admin Pages
 import AdminDashboard from './pages/admin/Dashboard';
@@ -103,7 +104,8 @@ function App() {
               {/* Communication */}
               <Route path="messages" element={<SellerMessages />} />
               <Route path="disputes" element={<SellerDisputes />} />
-
+              
+              <Route path="shipping" element={<SellerShipping />} />
               {/* Settings */}
               <Route path="settings" element={<SellerSettings />} />
             </Route>

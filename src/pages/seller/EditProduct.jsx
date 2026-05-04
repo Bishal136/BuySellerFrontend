@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  FiSave, FiX, FiUpload, FiTrash2, FiStar, 
+import {
+  FiSave, FiX, FiUpload, FiTrash2, FiStar,
   FiPlus, FiImage, FiAlertCircle, FiCheckCircle
 } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
@@ -45,7 +45,7 @@ const EditProduct = () => {
     try {
       const response = await api.get(`/seller/products/${id}`);
       const product = response.data.product;
-      
+
       setFormData({
         name: product.name || '',
         description: product.description || '',
@@ -61,15 +61,15 @@ const EditProduct = () => {
         images: product.images || [],
         status: product.status || 'draft'
       });
-      
+
       setVariants(product.variants || []);
-      
+
       // Convert specifications to array for editing
       if (product.specifications && Object.keys(product.specifications).length > 0) {
         const specsArray = Object.entries(product.specifications).map(([key, value]) => ({ key, value }));
         setSpecs(specsArray);
       }
-      
+
     } catch (error) {
       toast.error('Failed to load product');
       navigate('/seller/products');
@@ -92,16 +92,16 @@ const EditProduct = () => {
     if (files.length === 0) return;
 
     setUploading(true);
-    
+
     for (const file of files) {
       const formData = new FormData();
       formData.append('image', file);
-      
+
       try {
         const response = await api.post('/seller/products/upload-image', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        
+
         setFormData(prev => ({
           ...prev,
           images: [...prev.images, {
@@ -111,13 +111,13 @@ const EditProduct = () => {
             alt: ''
           }]
         }));
-        
+
         toast.success('Image uploaded successfully');
       } catch (error) {
         toast.error('Failed to upload image');
       }
     }
-    
+
     setUploading(false);
     e.target.value = '';
   };
@@ -146,7 +146,7 @@ const EditProduct = () => {
     const newSpecs = [...specs];
     newSpecs[index][field] = value;
     setSpecs(newSpecs);
-    
+
     // Update specifications object
     const specsObj = {};
     newSpecs.forEach(spec => {
@@ -175,12 +175,12 @@ const EditProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.price || !formData.stock || !formData.category) {
       toast.error('Please fill all required fields');
       return;
     }
-    
+
     setLoading(true);
     try {
       const productData = {
@@ -190,7 +190,7 @@ const EditProduct = () => {
         stock: parseInt(formData.stock),
         variants
       };
-      
+
       await api.put(`/seller/products/${id}`, productData);
       toast.success('Product updated successfully');
       navigate('/seller/products');
@@ -251,7 +251,7 @@ const EditProduct = () => {
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 required
               />
@@ -270,7 +270,7 @@ const EditProduct = () => {
               <input
                 type="text"
                 value={formData.brand}
-                onChange={(e) => setFormData({...formData, brand: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
                 className="w-full p-2 border border-gray-200 rounded-lg"
               />
             </div>
@@ -278,7 +278,7 @@ const EditProduct = () => {
               <label className="block text-sm font-medium mb-2">Category *</label>
               <select
                 value={formData.category}
-                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 className="w-full p-2 border border-gray-200 rounded-lg"
                 required
               >
@@ -294,7 +294,7 @@ const EditProduct = () => {
             <textarea
               rows="2"
               value={formData.shortDescription}
-              onChange={(e) => setFormData({...formData, shortDescription: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
               className="w-full p-2 border border-gray-200 rounded-lg"
               placeholder="Brief description (max 300 characters)"
               maxLength="300"
@@ -305,7 +305,7 @@ const EditProduct = () => {
             <textarea
               rows="6"
               value={formData.description}
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               className="w-full p-2 border border-gray-200 rounded-lg"
               required
             />
@@ -319,9 +319,12 @@ const EditProduct = () => {
             {formData.images.map((image, index) => (
               <div key={index} className="relative group">
                 <img
-                 src={product.images?.[0]?.url || PLACEHOLDER_IMAGE}
+                  src={image.url || PLACEHOLDER_IMAGE}
                   alt={`Product ${index + 1}`}
                   className="w-full h-32 object-cover rounded-lg"
+                  onError={(e) => {
+                    e.target.src = PLACEHOLDER_IMAGE;
+                  }}
                 />
                 {image.isPrimary && (
                   <div className="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
@@ -377,23 +380,23 @@ const EditProduct = () => {
           <h2 className="text-lg font-semibold mb-4">Pricing & Inventory</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Selling Price * ($)</label>
+              <label className="block text-sm font-medium mb-2">Selling Price (৳)</label>
               <input
                 type="number"
-                step="0.01"
+                step="1"
                 value={formData.price}
-                onChange={(e) => setFormData({...formData, price: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 className="w-full p-2 border border-gray-200 rounded-lg"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Compare Price ($)</label>
+              <label className="block text-sm font-medium mb-2">MRP (৳)</label>
               <input
                 type="number"
-                step="0.01"
+                step="1"
                 value={formData.comparePrice}
-                onChange={(e) => setFormData({...formData, comparePrice: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, comparePrice: e.target.value })}
                 className="w-full p-2 border border-gray-200 rounded-lg"
                 placeholder="Original price"
               />
@@ -403,7 +406,7 @@ const EditProduct = () => {
               <input
                 type="number"
                 value={formData.stock}
-                onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                 className="w-full p-2 border border-gray-200 rounded-lg"
                 required
                 min="0"
@@ -493,7 +496,7 @@ const EditProduct = () => {
                   type="radio"
                   value={option.value}
                   checked={formData.status === option.value}
-                  onChange={(e) => setFormData({...formData, status: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                 />
                 <span className="text-sm">{option.label}</span>
               </label>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { FiShoppingCart, FiUser, FiSearch, FiMenu, FiX, FiHeart } from 'react-icons/fi';
+import { FiShoppingCart, FiUser, FiSearch, FiMenu, FiX, FiHeart, FiHome, FiPackage, FiShoppingBag, FiBarChart2, FiSettings } from 'react-icons/fi';
 import { logout } from '../../redux/slices/authSlice';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationBell from '../common/NotificationBell';
@@ -42,6 +42,50 @@ const Header = () => {
 
   const cartItemCount = items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
+  // Navigation items based on user role
+  const getNavItems = () => {
+    const commonItems = [
+      { path: '/', label: 'Home', icon: FiHome },
+      { path: '/products', label: 'Shop', icon: FiShoppingBag }
+    ];
+
+    if (!isAuthenticated) {
+      return commonItems;
+    }
+
+    switch (user?.role) {
+      case 'admin':
+        return [
+          ...commonItems,
+          { path: '/admin/dashboard', label: 'Admin Panel', icon: FiBarChart2 }
+        ];
+      case 'seller':
+        return [
+          ...commonItems,
+          { path: '/seller/dashboard', label: 'Seller Dashboard', icon: FiPackage }
+        ];
+      default:
+        return commonItems;
+    }
+  };
+
+  const navItems = getNavItems();
+
+  // Get dashboard link for mobile menu
+  const getDashboardLink = () => {
+    if (!isAuthenticated) return null;
+    switch (user?.role) {
+      case 'admin':
+        return { path: '/admin/dashboard', label: 'Admin Dashboard' };
+      case 'seller':
+        return { path: '/seller/dashboard', label: 'Seller Dashboard' };
+      default:
+        return null;
+    }
+  };
+
+  const dashboardLink = getDashboardLink();
+
   return (
     <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${
       isScrolled ? 'bg-white shadow-md py-2' : 'bg-white/95 shadow-sm py-4'
@@ -53,24 +97,17 @@ const Header = () => {
             ShopHub
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - Role based */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="hover:text-primary-600 transition-colors">
-              Home
-            </Link>
-            <Link to="/products" className="hover:text-primary-600 transition-colors">
-              Shop
-            </Link>
-            {user?.role === 'seller' && (
-              <Link to="/seller/dashboard" className="hover:text-primary-600 transition-colors">
-                Seller Dashboard
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className="hover:text-primary-600 transition-colors font-medium"
+              >
+                {item.label}
               </Link>
-            )}
-            {user?.role === 'admin' && (
-              <Link to="/admin/dashboard" className="hover:text-primary-600 transition-colors">
-                Admin
-              </Link>
-            )}
+            ))}
           </nav>
 
           {/* Icons: Search, Wishlist, Cart, Notifications, User Menu */}
@@ -97,14 +134,14 @@ const Header = () => {
               <FiSearch className="w-5 h-5" />
             </button>
 
-            {/* Wishlist */}
-            {isAuthenticated && (
+            {/* Wishlist - Only for customers */}
+            {isAuthenticated && user?.role === 'customer' && (
               <Link to="/wishlist" className="hidden sm:block p-2 hover:bg-gray-100 rounded-full transition-colors">
                 <FiHeart className="w-5 h-5" />
               </Link>
             )}
 
-            {/* Cart */}
+            {/* Cart - Everyone can see */}
             <Link to="/cart" className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
               <FiShoppingCart className="w-5 h-5" />
               {cartItemCount > 0 && (
@@ -139,41 +176,61 @@ const Header = () => {
                         <div className="px-4 py-3 border-b">
                           <p className="font-semibold text-gray-800">{user?.name}</p>
                           <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+                          <p className="text-xs text-primary-600 mt-1 capitalize">{user?.role}</p>
                         </div>
+                        
+                        {/* Role-specific dashboard link */}
+                        {dashboardLink && (
+                          <Link
+                            to={dashboardLink.path}
+                            className="block px-4 py-2 hover:bg-gray-50 transition-colors"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            📊 {dashboardLink.label}
+                          </Link>
+                        )}
+                        
+                        {/* Common links for all authenticated users */}
                         <Link
                           to="/profile"
                           className="block px-4 py-2 hover:bg-gray-50 transition-colors"
                           onClick={() => setIsMenuOpen(false)}
                         >
-                          My Profile
+                          👤 My Profile
                         </Link>
                         <Link
                           to="/orders"
                           className="block px-4 py-2 hover:bg-gray-50 transition-colors"
                           onClick={() => setIsMenuOpen(false)}
                         >
-                          My Orders
+                          📦 My Orders
                         </Link>
-                        <Link
-                          to="/wishlist"
-                          className="block px-4 py-2 hover:bg-gray-50 transition-colors"
-                          onClick={() => setIsMenuOpen(false)}
-                        >
-                          Wishlist
-                        </Link>
+                        
+                        {/* Wishlist - Only for customers */}
+                        {user?.role === 'customer' && (
+                          <Link
+                            to="/wishlist"
+                            className="block px-4 py-2 hover:bg-gray-50 transition-colors"
+                            onClick={() => setIsMenuOpen(false)}
+                          >
+                            ❤️ Wishlist
+                          </Link>
+                        )}
+                        
                         <Link
                           to="/notifications"
                           className="block px-4 py-2 hover:bg-gray-50 transition-colors"
                           onClick={() => setIsMenuOpen(false)}
                         >
-                          Notifications
+                          🔔 Notifications
                         </Link>
+                        
                         <div className="border-t my-1"></div>
                         <button
                           onClick={handleLogout}
                           className="block w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors text-red-600"
                         >
-                          Logout
+                          🚪 Logout
                         </button>
                       </>
                     ) : (
@@ -183,14 +240,14 @@ const Header = () => {
                           className="block px-4 py-2 hover:bg-gray-50 transition-colors"
                           onClick={() => setIsMenuOpen(false)}
                         >
-                          Login
+                          🔐 Login
                         </Link>
                         <Link
                           to="/register"
                           className="block px-4 py-2 hover:bg-gray-50 transition-colors"
                           onClick={() => setIsMenuOpen(false)}
                         >
-                          Register
+                          📝 Register
                         </Link>
                       </>
                     )}
@@ -245,91 +302,88 @@ const Header = () => {
               className="md:hidden mt-4 overflow-hidden border-t pt-4"
             >
               <div className="flex flex-col space-y-3">
-                <Link
-                  to="/"
-                  className="hover:text-primary-600 transition-colors py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Home
-                </Link>
-                <Link
-                  to="/products"
-                  className="hover:text-primary-600 transition-colors py-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Shop
-                </Link>
+                {/* Mobile nav items based on role */}
+                {navItems.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className="hover:text-primary-600 transition-colors py-2 flex items-center gap-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    {item.label}
+                  </Link>
+                ))}
+                
                 {isAuthenticated && (
                   <>
+                    {dashboardLink && (
+                      <Link
+                        to={dashboardLink.path}
+                        className="hover:text-primary-600 transition-colors py-2 flex items-center gap-2"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        📊 {dashboardLink.label}
+                      </Link>
+                    )}
+                    
                     <Link
                       to="/profile"
-                      className="hover:text-primary-600 transition-colors py-2"
+                      className="hover:text-primary-600 transition-colors py-2 flex items-center gap-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      My Profile
+                      👤 My Profile
                     </Link>
                     <Link
                       to="/orders"
-                      className="hover:text-primary-600 transition-colors py-2"
+                      className="hover:text-primary-600 transition-colors py-2 flex items-center gap-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      My Orders
+                      📦 My Orders
                     </Link>
-                    <Link
-                      to="/wishlist"
-                      className="hover:text-primary-600 transition-colors py-2"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Wishlist
-                    </Link>
+                    
+                    {user?.role === 'customer' && (
+                      <Link
+                        to="/wishlist"
+                        className="hover:text-primary-600 transition-colors py-2 flex items-center gap-2"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        ❤️ Wishlist
+                      </Link>
+                    )}
+                    
                     <Link
                       to="/notifications"
-                      className="hover:text-primary-600 transition-colors py-2"
+                      className="hover:text-primary-600 transition-colors py-2 flex items-center gap-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Notifications
+                      🔔 Notifications
                     </Link>
-                    {user?.role === 'seller' && (
-                      <Link
-                        to="/seller/dashboard"
-                        className="hover:text-primary-600 transition-colors py-2"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Seller Dashboard
-                      </Link>
-                    )}
-                    {user?.role === 'admin' && (
-                      <Link
-                        to="/admin/dashboard"
-                        className="hover:text-primary-600 transition-colors py-2"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Admin Dashboard
-                      </Link>
-                    )}
+                    
                     <button
                       onClick={handleLogout}
-                      className="text-left text-red-600 hover:text-red-700 py-2"
+                      className="text-left text-red-600 hover:text-red-700 py-2 flex items-center gap-2"
                     >
-                      Logout
+                      🚪 Logout
                     </button>
                   </>
                 )}
+                
                 {!isAuthenticated && (
                   <>
                     <Link
                       to="/login"
-                      className="hover:text-primary-600 transition-colors py-2"
+                      className="hover:text-primary-600 transition-colors py-2 flex items-center gap-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Login
+                      🔐 Login
                     </Link>
                     <Link
                       to="/register"
-                      className="hover:text-primary-600 transition-colors py-2"
+                      className="hover:text-primary-600 transition-colors py-2 flex items-center gap-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      Register
+                      📝 Register
                     </Link>
                   </>
                 )}

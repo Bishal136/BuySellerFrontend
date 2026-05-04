@@ -171,7 +171,7 @@ const SellerInventory = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-500 text-sm">Inventory Value</p>
-              <p className="text-2xl font-bold text-green-600">${stats.totalValue.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-green-600">BTD {stats.totalValue.toFixed(2)}</p>
             </div>
             <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
               <FiDownload className="w-5 h-5 text-green-600" />
@@ -275,7 +275,7 @@ const SellerInventory = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">{product.sku || 'N/A'}</td>
-                        <td className="px-6 py-4 font-semibold text-gray-800">${product.price?.toFixed(2)}</td>
+                        <td className="px-6 py-4 font-semibold text-gray-800">BDT {product.price?.toFixed(2)}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <button

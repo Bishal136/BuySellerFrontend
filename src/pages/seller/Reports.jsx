@@ -145,7 +145,7 @@ const SellerReports = () => {
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-green-100 text-sm">Total Revenue</p>
-                <p className="text-3xl font-bold">${summary.totalRevenue.toFixed(2)}</p>
+                <p className="text-3xl font-bold">BDT {summary.totalRevenue.toFixed(2)}</p>
               </div>
               <FiDollarSign className="w-12 h-12 text-green-200" />
             </div>

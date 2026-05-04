@@ -72,7 +72,7 @@ const SellerDashboard = () => {
   const statCards = [
     {
       title: 'Total Revenue',
-      value: `$${stats?.totalRevenue?.toFixed(2) || '0'}`,
+      value: `BDT ${stats?.totalRevenue?.toFixed(2) || '0'}`,
       icon: FiDollarSign,
       color: 'bg-green-500',
       change: '+12.5%',

@@ -181,3 +181,19 @@
     -webkit-line-clamp: 3;
   }
 }
+
+/* Half star fill for ratings */
+.half-fill {
+  position: relative;
+}
+
+.half-fill:before {
+  content: '★';
+  position: absolute;
+  left: 0;
+  width: 50%;
+  overflow: hidden;
+  color: #fbbf24;
+}
+
+
