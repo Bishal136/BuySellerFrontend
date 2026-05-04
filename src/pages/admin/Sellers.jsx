@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiSearch, FiEye, FiCheckCircle, FiXCircle,
   FiClock, FiFileText, FiMapPin, FiPhone, FiMail,
-  FiRefreshCw
+  FiRefreshCw, FiPlus
 } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import api from '../../services/api';
@@ -17,6 +17,10 @@ const Sellers = () => {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [verificationNotes, setVerificationNotes] = useState('');
   const [action, setAction] = useState('verify');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '', email: '', phone: '', storeName: '', businessName: '', businessEmail: '', businessPhone: ''
+  });
 
   useEffect(() => {
     fetchSellers();
@@ -35,6 +39,19 @@ const Sellers = () => {
       toast.error('Failed to load sellers');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateSeller = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/admin/sellers', formData);
+      toast.success('Seller created successfully');
+      setShowAddModal(false);
+      setFormData({ name: '', email: '', phone: '', storeName: '', businessName: '', businessEmail: '', businessPhone: '' });
+      fetchSellers();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to create seller');
     }
   };
 
@@ -84,9 +101,14 @@ const Sellers = () => {
           <h1 className="text-2xl font-bold">Seller Management</h1>
           <p className="text-gray-500 mt-1">Verify and manage seller accounts</p>
         </div>
-        <button onClick={fetchSellers} className="btn-secondary flex items-center gap-2">
-          <FiRefreshCw className="w-4 h-4" /> Refresh
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowAddModal(true)} className="btn-primary flex items-center gap-2">
+            <FiPlus className="w-4 h-4" /> Add Seller
+          </button>
+          <button onClick={fetchSellers} className="btn-secondary flex items-center gap-2">
+            <FiRefreshCw className="w-4 h-4" /> Refresh
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -269,6 +291,69 @@ const Sellers = () => {
                   Cancel
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Add Seller Modal */}
+      <AnimatePresence>
+        {showAddModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            >
+              <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+                <h2 className="text-xl font-bold">Add New Seller</h2>
+                <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600">
+                  <FiXCircle className="w-6 h-6" />
+                </button>
+              </div>
+              <form onSubmit={handleCreateSeller} className="p-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h3 className="font-semibold border-b pb-2">Personal Details</h3>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Full Name *</label>
+                      <input type="text" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Email *</label>
+                      <input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Phone *</label>
+                      <input type="tel" required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg" />
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="font-semibold border-b pb-2">Business Details</h3>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Store Name *</label>
+                      <input type="text" required value={formData.storeName} onChange={e => setFormData({...formData, storeName: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Business Name *</label>
+                      <input type="text" required value={formData.businessName} onChange={e => setFormData({...formData, businessName: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Business Email</label>
+                      <input type="email" value={formData.businessEmail} onChange={e => setFormData({...formData, businessEmail: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Business Phone</label>
+                      <input type="tel" value={formData.businessPhone} onChange={e => setFormData({...formData, businessPhone: e.target.value})} className="w-full p-2 border border-gray-200 rounded-lg" />
+                    </div>
+                  </div>
+                </div>
+                <div className="pt-4 border-t flex justify-end gap-3 sticky bottom-0 bg-white">
+                  <button type="button" onClick={() => setShowAddModal(false)} className="btn-secondary">Cancel</button>
+                  <button type="submit" className="btn-primary">Create Seller</button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}

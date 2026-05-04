@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
-const HeroSlider = () => {
+const HeroSlider = ({ banners = [] }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   
-  const slides = [
+  const defaultSlides = [
     {
       id: 1,
       title: 'Summer Sale 2024',
@@ -38,6 +38,17 @@ const HeroSlider = () => {
       color: 'from-blue-600 to-blue-800'
     }
   ];
+
+  const slides = banners && banners.length > 0 ? banners.map((b, index) => ({
+    id: b._id,
+    title: b.title,
+    subtitle: b.subtitle,
+    description: '',
+    image: b.image,
+    cta: 'Shop Now',
+    link: b.link || '/products',
+    color: ['from-primary-600 to-primary-800', 'from-purple-600 to-purple-800', 'from-blue-600 to-blue-800'][index % 3]
+  })) : defaultSlides;
 
   useEffect(() => {
     const timer = setInterval(() => {

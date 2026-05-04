@@ -191,6 +191,7 @@ const HomePage = () => {
   const [bestSellers, setBestSellers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [flashSaleProducts, setFlashSaleProducts] = useState([]);
+  const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [countdown, setCountdown] = useState({ hours: 0, minutes: 0, seconds: 0 });
 
@@ -201,12 +202,13 @@ const HomePage = () => {
 
   const fetchHomeData = async () => {
     try {
-      const [featuredRes, newRes, bestRes, categoriesRes, flashRes] = await Promise.all([
+      const [featuredRes, newRes, bestRes, categoriesRes, flashRes, bannersRes] = await Promise.all([
         api.get('/products?isFeatured=true&limit=8'),
         api.get('/products?sort=newest&limit=8'),
         api.get('/products?sort=popularity&limit=8'),
         api.get('/categories'),
-        api.get('/products?isFlashSale=true&limit=4')
+        api.get('/products?isFlashSale=true&limit=4'),
+        api.get('/banners')
       ]);
 
       setFeaturedProducts(featuredRes.data.products);
@@ -214,6 +216,7 @@ const HomePage = () => {
       setBestSellers(bestRes.data.products);
       setCategories(categoriesRes.data.categories);
       setFlashSaleProducts(flashRes.data.products || []);
+      setBanners(bannersRes.data.banners || []);
     } catch (error) {
       console.error('Error fetching home data:', error);
     } finally {
@@ -251,10 +254,13 @@ const HomePage = () => {
   const categoriesToShow = categories.slice(0, 12);
   const categoriesToShowGrid = categories.slice(0, 6);
 
+  const promoBanners = banners.filter(b => b.type === 'promo_banner');
+  const promoBanner = promoBanners.length > 0 ? promoBanners[0] : null;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Slider */}
-      <HeroSlider />
+      <HeroSlider banners={banners.filter(b => b.type === 'main_slider')} />
 
       {/* Features Strip */}
       <section className="container mx-auto px-4 py-8">
@@ -375,30 +381,44 @@ const HomePage = () => {
       </section>
 
       {/* Banner / Promo Section */}
-      <section className="container mx-auto px-4 py-8">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-600 to-primary-800 p-8 md:p-12">
-          <div className="relative z-10 max-w-2xl">
-            <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white mb-3">
-              Limited Time Offer
-            </span>
-            <h2 className="text-3xl font-extrabold text-white md:text-4xl mb-3">
-              Summer Sale 2024
-            </h2>
-            <p className="text-white/90 mb-6">
-              Up to 50% off on selected items. Don't miss out on these amazing deals!
-            </p>
-            <Link 
-              to="/products?sort=discount" 
-              className="inline-flex items-center gap-2 bg-white text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all hover:scale-105"
-            >
-              Shop Now <FiArrowRight />
-            </Link>
+      {promoBanner && (
+        <section className="container mx-auto px-4 py-8">
+          <div 
+            className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-600 to-primary-800 p-8 md:p-12 bg-cover bg-center"
+            style={promoBanner.image ? { backgroundImage: `url(${promoBanner.image})` } : {}}
+          >
+            {promoBanner.image && (
+              <div className="absolute inset-0 bg-black/40 z-0"></div>
+            )}
+            <div className="relative z-10 max-w-2xl">
+              <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white mb-3 backdrop-blur-sm">
+                Limited Time Offer
+              </span>
+              <h2 className="text-3xl font-extrabold text-white md:text-4xl mb-3 drop-shadow-md">
+                {promoBanner.title}
+              </h2>
+              {promoBanner.subtitle && (
+                <p className="text-white/90 mb-6 drop-shadow">
+                  {promoBanner.subtitle}
+                </p>
+              )}
+              <Link 
+                to={promoBanner.link || "/products"} 
+                className="inline-flex items-center gap-2 bg-white text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all hover:scale-105 shadow-lg"
+              >
+                Shop Now <FiArrowRight />
+              </Link>
+            </div>
+            {/* Decorative circles */}
+            {!promoBanner.image && (
+              <>
+                <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
+                <div className="absolute right-20 bottom-0 w-32 h-32 bg-white/5 rounded-full"></div>
+              </>
+            )}
           </div>
-          {/* Decorative circles */}
-          <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
-          <div className="absolute right-20 bottom-0 w-32 h-32 bg-white/5 rounded-full"></div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* New Arrivals */}
       <section className="container mx-auto px-4 py-8">

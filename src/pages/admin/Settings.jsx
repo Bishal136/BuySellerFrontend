@@ -60,8 +60,10 @@ const AdminSettings = () => {
     setLoading(true);
     try {
       // Fetch settings from API
-      // const response = await api.get('/admin/settings');
-      // setSettings(response.data.settings);
+      const response = await api.get('/admin/settings');
+      if (response.data.settings) {
+        setSettings(response.data.settings);
+      }
     } catch (error) {
       toast.error('Failed to load settings');
     } finally {
@@ -72,7 +74,7 @@ const AdminSettings = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // await api.put('/admin/settings', settings);
+      await api.put('/admin/settings', settings);
       toast.success('Settings saved successfully');
     } catch (error) {
       toast.error('Failed to save settings');
