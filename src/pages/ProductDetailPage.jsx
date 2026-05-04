@@ -137,46 +137,31 @@ const ProductDetailPage = () => {
     }
   };
 
-const handleBuyNow = async () => {
-  const currentStock = selectedVariant ? selectedVariant.stock : product?.stock;
-  if (currentStock < quantity) {
+const handleBuyNow = () => {
+  if (product.stock < quantity) {
     toast.error('Insufficient stock');
     return;
   }
 
-  setBuyingNow(true);
-  try {
-    // Create direct checkout item (NOT adding to cart)
-    const directCheckoutItem = {
-      _id: `temp_${Date.now()}`,
-      productId: product._id,
-      name: product.name,
-      price: product.price,
-      quantity: quantity,
-      image: product.images?.[selectedImage]?.url || product.images?.[0]?.url,
-      stock: product.stock,
-      sellerId: product.seller?._id || product.seller,
-      sellerName: seller?.storeName || 'Seller',
-      seller: {
-        _id: product.seller?._id || product.seller,
-        storeName: seller?.storeName
-      },
-      variant: selectedVariant,
-    };
+  // Create buy now item with seller info
+  const buyNowItem = {
+    productId: product._id,
+    name: product.name,
+    price: product.price,
+    quantity: quantity,
+    image: product.images?.[0]?.url || '',
+    sellerId: product.seller?._id || product.seller,
+    sellerName: product.seller?.storeName || 'Seller',
+    stock: product.stock,
+    brand: product.brand
+  };
 
-    // Navigate directly to checkout with the item
-    navigate('/checkout', { 
-      state: { 
-        buyNowItem: directCheckoutItem,
-        isBuyNow: true 
-      } 
-    });
-  } catch (error) {
-    console.error('Buy Now error:', error);
-    toast.error('Something went wrong. Please try again.');
-  } finally {
-    setBuyingNow(false);
-  }
+  navigate('/checkout', { 
+    state: { 
+      buyNowItem: buyNowItem,
+      isBuyNow: true 
+    } 
+  });
 };
 
   const handleAddToWishlist = async () => {

@@ -90,14 +90,16 @@ export const syncGuestCart = createAsyncThunk(
   'cart/syncGuestCart',
   async (guestItems, { getState, rejectWithValue }) => {
     try {
-      // Format guest items for backend
+      // Format guest items for backend with seller info
       const formattedItems = guestItems.map(item => ({
         productId: item.productId,
         quantity: item.quantity,
         price: item.price,
-        name: item.name
+        name: item.name,
+        sellerId: item.sellerId,
+        sellerName: item.sellerName
       }));
-      
+
       const response = await api.post('/cart/sync', { guestItems: formattedItems });
       return response.data.cart;
     } catch (error) {
@@ -128,9 +130,9 @@ const calculateGuestTotals = (items) => {
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const discount = 0;
   const tax = (subtotal - discount) * 0.10;
-  const shippingCost = subtotal - discount > 50 ? 0 : 5.99;
+  const shippingCost = subtotal - discount > 5000 ? 0 : 100; // Changed to BDT
   const total = subtotal - discount + tax + shippingCost;
-  
+
   return { subtotal, discount, tax, shippingCost, total };
 };
 
@@ -156,7 +158,11 @@ const cartSlice = createSlice({
     addToGuestCart: (state, action) => {
       const { product, quantity = 1 } = action.payload;
       const existingItem = state.items.find(item => item.productId === product._id);
-      
+
+      // Get seller ID - try multiple sources
+      const sellerId = product.seller?._id || product.seller || product.sellerId;
+      const sellerName = product.seller?.storeName || product.sellerName || 'TechGadgets Bangladesh';
+
       if (existingItem) {
         existingItem.quantity += quantity;
       } else {
@@ -167,18 +173,22 @@ const cartSlice = createSlice({
           image: product.images?.[0]?.url || '',
           price: product.price,
           quantity: quantity,
-          seller: product.seller,
-          stock: product.stock
+          sellerId: sellerId,
+          sellerName: sellerName,
+          seller: sellerId, // Ensure this is set
+          stock: product.stock,
+          brand: product.brand,
+          comparePrice: product.comparePrice
         });
       }
-      
+
       const totals = calculateGuestTotals(state.items);
       state.subtotal = totals.subtotal;
       state.discount = totals.discount;
       state.tax = totals.tax;
       state.shippingCost = totals.shippingCost;
       state.total = totals.total;
-      
+
       saveGuestCart({ items: state.items, coupon: state.coupon });
     },
     updateGuestCartItem: (state, action) => {
@@ -230,7 +240,7 @@ const cartSlice = createSlice({
       }
       state.discount = Math.min(discount, totals.subtotal);
       state.tax = (totals.subtotal - state.discount) * 0.10;
-      state.shippingCost = totals.subtotal - state.discount > 50 ? 0 : 5.99;
+      state.shippingCost = totals.subtotal - state.discount > 5000 ? 0 : 100;
       state.total = totals.subtotal - state.discount + state.tax + state.shippingCost;
       saveGuestCart({ items: state.items, coupon: state.coupon });
     },

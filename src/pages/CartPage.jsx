@@ -218,6 +218,7 @@ const CartPage = () => {
     toast.success('Coupon removed');
   };
 
+ // Updated handleCheckout function with seller info
 const handleCheckout = () => {
   console.log('=== HANDLE CHECKOUT CALLED ===');
   console.log('Selected items IDs:', selectedItems);
@@ -228,10 +229,35 @@ const handleCheckout = () => {
     return;
   }
 
-  // Get the selected items data with all details
-  const itemsToCheckout = items.filter(item => selectedItems.includes(item._id));
+  // Get the selected items data with all details including seller info
+  const itemsToCheckout = items.filter(item => selectedItems.includes(item._id)).map(item => ({
+    _id: item._id,
+    productId: item.productId || item.product?._id,
+    name: item.name,
+    image: item.image,
+    price: item.price,
+    quantity: item.quantity,
+    stock: item.stock,
+    brand: item.brand,
+    // Critical: Include seller information
+    sellerId: item.sellerId || item.seller?._id,
+    sellerName: item.sellerName || item.seller?.storeName || 'Seller',
+    seller: item.seller || item.sellerId,
+    // Include any other relevant fields
+    color: item.color,
+    size: item.size,
+    selected: true
+  }));
   
-  console.log('Items to checkout (full objects):', JSON.stringify(itemsToCheckout, null, 2));
+  console.log('Items to checkout (with seller info):', JSON.stringify(itemsToCheckout, null, 2));
+  
+  // Validate seller info for each item
+  const missingSellerInfo = itemsToCheckout.filter(item => !item.sellerId);
+  if (missingSellerInfo.length > 0) {
+    console.error('Missing seller info for items:', missingSellerInfo);
+    toast.error('Some items are missing seller information. Please try adding them to cart again.');
+    return;
+  }
   
   if (itemsToCheckout.length === 0) {
     toast.error('No items found for checkout');
@@ -244,7 +270,7 @@ const handleCheckout = () => {
     return;
   }
 
-  // Use navigate with state
+  // Navigate to checkout page with selected items
   navigate('/checkout', { 
     state: { 
       selectedItems: itemsToCheckout 

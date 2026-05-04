@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import api from '../services/api';
+import { formatBDT } from '../utils/currency'; // Add currency formatting
 
 const OrderDetailsPage = () => {
   const { id } = useParams();
@@ -207,6 +208,9 @@ const OrderDetailsPage = () => {
   const canReturn = order.status === 'delivered' && !order.returnRequest;
   const hasReturnRequest = order.returnRequest && order.returnRequest.status !== 'rejected';
 
+  // Safe check for orderItems
+  const orderItems = order.orderItems || [];
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-5xl">
@@ -278,7 +282,7 @@ const OrderDetailsPage = () => {
         </motion.div>
 
         {/* Order Status Timeline */}
-        {trackingInfo && trackingInfo.timeline && (
+        {trackingInfo && trackingInfo.timeline && trackingInfo.timeline.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -356,24 +360,27 @@ const OrderDetailsPage = () => {
                 onClick={() => toggleSection('items')}
                 className="flex justify-between items-center w-full mb-4"
               >
-                <h2 className="text-xl font-semibold">Order Items ({order.orderItems?.length || 0})</h2>
+                <h2 className="text-xl font-semibold">Order Items ({orderItems.length})</h2>
                 {expandedSections.items ? <FiChevronUp /> : <FiChevronDown />}
               </button>
               
               {expandedSections.items && (
                 <div className="space-y-4">
-                  {order.orderItems?.map((item, idx) => (
+                  {orderItems.map((item, idx) => (
                     <motion.div
-                      key={item._id}
+                      key={item._id || idx}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.1 }}
                       className="flex gap-4 pb-4 border-b last:border-0"
                     >
                       <img
-                        src={item.product?.images?.[0]?.url || item.image || 'https://via.placeholder.com/100'}
+                        src={item.product?.images?.[0]?.url || item.image || 'https://placehold.co/100x100?text=Product'}
                         alt={item.name}
                         className="w-24 h-24 object-cover rounded-lg"
+                        onError={(e) => {
+                          e.target.src = 'https://placehold.co/100x100?text=Product';
+                        }}
                       />
                       <div className="flex-1">
                         <Link 
@@ -387,9 +394,9 @@ const OrderDetailsPage = () => {
                         )}
                         <div className="flex flex-wrap gap-4 mt-2">
                           <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                          <p className="text-sm text-gray-600">Price: ${item.price?.toFixed(2)}</p>
+                          <p className="text-sm text-gray-600">Price: {formatBDT(item.price)}</p>
                           <p className="text-sm font-semibold text-primary-600">
-                            Total: ${(item.price * item.quantity).toFixed(2)}
+                            Total: {formatBDT(item.price * item.quantity)}
                           </p>
                         </div>
                         {order.status === 'delivered' && !hasReturnRequest && (
@@ -425,26 +432,26 @@ const OrderDetailsPage = () => {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
-                  <span>${order.itemsPrice?.toFixed(2)}</span>
+                  <span>{formatBDT(order.itemsPrice)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
-                  <span>${order.shippingPrice?.toFixed(2)}</span>
+                  <span>{formatBDT(order.shippingPrice)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tax (10%)</span>
-                  <span>${order.taxPrice?.toFixed(2)}</span>
+                  <span>{formatBDT(order.taxPrice)}</span>
                 </div>
                 {order.discountPrice > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Discount</span>
-                    <span>-${order.discountPrice?.toFixed(2)}</span>
+                    <span>-{formatBDT(order.discountPrice)}</span>
                   </div>
                 )}
                 <div className="border-t pt-3 mt-3">
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span className="text-primary-600">${order.totalPrice?.toFixed(2)}</span>
+                    <span className="text-primary-600">{formatBDT(order.totalPrice)}</span>
                   </div>
                 </div>
               </div>
@@ -560,7 +567,7 @@ const OrderDetailsPage = () => {
                 </p>
                 {order.returnRequest?.refundAmount && (
                   <p className="text-sm text-orange-700 mt-2">
-                    Refund Amount: <span className="font-semibold">${order.returnRequest.refundAmount.toFixed(2)}</span>
+                    Refund Amount: {formatBDT(order.returnRequest.refundAmount)}
                   </p>
                 )}
                 {order.returnRequest?.adminComments && (

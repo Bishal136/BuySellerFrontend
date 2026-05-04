@@ -27,30 +27,29 @@ const ProductCard = ({ product, featured = false, viewMode = 'grid' }) => {
   );
 
   const handleAddToCart = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (product.stock === 0) {
-      toast.error('Out of stock!');
-      return;
-    }
-    
-    setIsAddingToCart(true);
-    
-    try {
-      if (isAuthenticated) {
-        await dispatch(addToCart({ productId: product._id, quantity: 1 })).unwrap();
-        toast.success('Added to cart!', { icon: '🛒' });
-      } else {
-        dispatch(addToGuestCart({ product, quantity: 1 }));
-        toast.success('Added to cart!', { icon: '🛒' });
-      }
-    } catch (error) {
-      toast.error('Failed to add to cart');
-    } finally {
-      setIsAddingToCart(false);
-    }
+  e.preventDefault();
+  e.stopPropagation();
+  
+  if (product.stock === 0) {
+    toast.error('Out of stock!');
+    return;
+  }
+  
+  // Ensure product has seller info
+  const productWithSeller = {
+    ...product,
+    sellerId: product.seller?._id || product.seller,
+    sellerName: product.seller?.storeName || product.brand || 'Seller'
   };
+  
+  if (isAuthenticated) {
+    await dispatch(addToCart({ productId: product._id, quantity: 1 }));
+    toast.success('Added to cart!');
+  } else {
+    dispatch(addToGuestCart({ product: productWithSeller, quantity: 1 }));
+    toast.success('Added to cart!');
+  }
+};
 
   const handleAddToWishlist = async (e) => {
     e.preventDefault();
