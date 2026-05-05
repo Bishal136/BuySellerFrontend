@@ -246,7 +246,7 @@ const SellerOrders = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">{order.items?.length} items</td>
-                        <td className="px-6 py-4 font-semibold text-gray-800">${order.totalAmount?.toFixed(2)}</td>
+                        <td className="px-6 py-4 font-semibold text-gray-800">BDT {order.totalAmount?.toFixed(2)}</td>
                         <td className="px-6 py-4">
                           <div className="relative">
                             <select

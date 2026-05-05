@@ -33,7 +33,7 @@ const AdminDashboard = () => {
     { title: 'Total Sellers', value: stats?.totalSellers || 0, icon: FiUserCheck, color: 'bg-green-500', link: '/admin/sellers' },
     { title: 'Total Products', value: stats?.totalProducts || 0, icon: FiPackage, color: 'bg-purple-500', link: '/admin/products' },
     { title: 'Total Orders', value: stats?.totalOrders || 0, icon: FiShoppingBag, color: 'bg-orange-500', link: '/admin/orders' },
-    { title: 'Total Revenue', value: `$${stats?.totalRevenue?.toFixed(2) || 0}`, icon: FiDollarSign, color: 'bg-yellow-500', link: '/admin/reports' },
+    { title: 'Total Revenue', value: `BDT ${stats?.totalRevenue?.toFixed(2) || 0}`, icon: FiDollarSign, color: 'bg-yellow-500', link: '/admin/reports' },
     { title: 'Pending Sellers', value: stats?.pendingSellers || 0, icon: FiClock, color: 'bg-red-500', link: '/admin/sellers?status=pending' },
   ];
 
@@ -110,11 +110,11 @@ const AdminDashboard = () => {
             <div className="flex justify-between items-center">
               <div>
                 <p className="text-sm text-gray-600">Weekly Revenue</p>
-                <p className="text-xl font-bold text-green-600">${stats?.weeklyRevenue?.toFixed(2) || 0}</p>
+                <p className="text-xl font-bold text-green-600">BDT {stats?.weeklyRevenue?.toFixed(2) || 0}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Monthly Revenue</p>
-                <p className="text-xl font-bold text-blue-600">${stats?.monthlyRevenue?.toFixed(2) || 0}</p>
+                <p className="text-xl font-bold text-blue-600">BDT {stats?.monthlyRevenue?.toFixed(2) || 0}</p>
               </div>
             </div>
           </div>

@@ -51,13 +51,12 @@ const CheckoutPage = () => {
   });
 
   useEffect(() => {
-    console.log('=== CHECKOUT PAGE MOUNTED ===');
-    console.log('Location state:', location.state);
+   
 
     // Handle Buy Now item first
     if (location.state?.buyNowItem) {
       const buyNowItem = location.state.buyNowItem;
-      console.log('Buy Now item received:', buyNowItem);
+     
       
       // Ensure buy now item has seller information
       const enhancedItem = {
@@ -71,17 +70,17 @@ const CheckoutPage = () => {
         quantity: Number(buyNowItem.quantity) || 1
       };
       
-      console.log('Enhanced buy now item:', enhancedItem);
+    
       setSelectedCheckoutItems([enhancedItem]);
       setIsBuyNow(true);
     }
     else if (location.state?.selectedItems) {
-      console.log('Selected items from cart:', location.state.selectedItems);
+    
       setSelectedCheckoutItems(location.state.selectedItems);
       setIsBuyNow(false);
     }
     else {
-      console.log('No items found - redirecting to cart');
+  
       toast.error('No items selected for checkout');
       navigate('/cart');
     }

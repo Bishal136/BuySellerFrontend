@@ -149,7 +149,7 @@ const RecentOrdersTable = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="font-semibold">${order.totalAmount?.toFixed(2)}</span>
+                  <span className="font-semibold">BDT {order.totalAmount?.toFixed(2)}</span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <select

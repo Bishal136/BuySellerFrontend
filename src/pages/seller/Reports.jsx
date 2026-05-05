@@ -195,8 +195,8 @@ const SellerReports = () => {
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-6 py-4">{data._id}</td>
                       <td className="px-6 py-4">{data.orders}</td>
-                      <td className="px-6 py-4 font-semibold">${data.revenue.toFixed(2)}</td>
-                      <td className="px-6 py-4">${(data.revenue / data.orders).toFixed(2)}</td>
+                      <td className="px-6 py-4 font-semibold">BDT {data.revenue.toFixed(2)}</td>
+                      <td className="px-6 py-4">BDT {(data.revenue / data.orders).toFixed(2)}</td>
                     </tr>
                   ))
                 )}

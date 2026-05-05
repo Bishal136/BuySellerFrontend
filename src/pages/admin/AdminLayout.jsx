@@ -26,7 +26,7 @@ const AdminLayout = () => {
     { path: '/admin/sellers', label: 'Sellers', icon: FiUserCheck },
     { path: '/admin/coupons', label: 'Coupons', icon: FiTag },
     { path: '/admin/banners', label: 'Banners', icon: FiImage },
-    { path: '/admin/announcements', label: 'Announcements', icon: FiBell },
+    // { path: '/admin/announcements', label: 'Announcements', icon: FiBell },
     { path: '/admin/commission', label: 'Commission', icon: FiPercent },
     { path: '/admin/audit-logs', label: 'Audit Logs', icon: FiFileText },
     { path: '/admin/settings', label: 'Settings', icon: FiSettings },

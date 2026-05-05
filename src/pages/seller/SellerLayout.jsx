@@ -28,8 +28,8 @@ const SellerLayout = () => {
     { path: '/seller/orders', label: 'Orders', icon: FiShoppingCart },
     { path: '/seller/analytics', label: 'Analytics', icon: FiBarChart2 },
     { path: '/seller/reports', label: 'Reports', icon: FiFileText },
-    { path: '/seller/messages', label: 'Messages', icon: FiMessageSquare },
-    { path: '/seller/disputes', label: 'Disputes', icon: FiAlertCircle },
+    // { path: '/seller/messages', label: 'Messages', icon: FiMessageSquare },
+    // { path: '/seller/disputes', label: 'Disputes', icon: FiAlertCircle },
     { path: '/seller/shipping', label: 'Shipping', icon: FiTruck },
     { path: '/seller/settings', label: 'Settings', icon: FiSettings },
   ];

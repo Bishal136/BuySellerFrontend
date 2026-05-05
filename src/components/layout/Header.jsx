@@ -60,8 +60,7 @@ const Header = () => {
   const mainNavLinks = [
     { path: '/', label: 'Home' },
     { path: '/products', label: 'Shop' },
-    { path: '/categories', label: 'Categories' },
-    { path: '/deals', label: 'Deals' },
+    
   ];
 
   const getDashboardLink = () => {
@@ -81,7 +80,7 @@ const Header = () => {
   return (
     <>
       {/* Top Bar - Hidden on Mobile */}
-      <div className="hidden lg:block bg-gray-900 text-gray-300 py-2 text-xs font-medium">
+      {/* <div className="hidden lg:block bg-gray-900 text-gray-300 py-2 text-xs font-medium">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center space-x-6">
             <span className="flex items-center gap-2 hover:text-white transition-colors cursor-pointer">
@@ -107,7 +106,7 @@ const Header = () => {
             </select>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Main Header */}
       <header className={`sticky top-0 w-full z-50 transition-all duration-300 ${
@@ -127,22 +126,22 @@ const Header = () => {
             {/* Logo */}
             <Link to="/" className="flex-shrink-0 flex items-center gap-2">
               <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-800 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-md">
-                S
+                B
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent hidden sm:block">
-                ShopHub
+                BuySeller
               </span>
             </Link>
 
             {/* Desktop Search Bar */}
             <div className="hidden lg:flex flex-1 max-w-2xl mx-auto">
               <form onSubmit={handleSearch} className="flex w-full relative group">
-                <select className="absolute left-0 top-0 h-full bg-gray-50 border border-r-0 border-gray-300 text-gray-600 text-sm rounded-l-full px-4 outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer hover:bg-gray-100 transition-colors hidden xl:block z-10 w-40">
+                {/* <select className="absolute left-0 top-0 h-full bg-gray-50 border border-r-0 border-gray-300 text-gray-600 text-sm rounded-l-full px-4 outline-none focus:ring-2 focus:ring-primary-500/20 cursor-pointer hover:bg-gray-100 transition-colors hidden xl:block z-10 w-40">
                   <option>All Categories</option>
                   <option>Electronics</option>
                   <option>Fashion</option>
                   <option>Home & Garden</option>
-                </select>
+                </select> */}
                 <input
                   type="text"
                   value={searchQuery}
@@ -466,7 +465,7 @@ const Header = () => {
             
             {/* Drawer Footer */}
             <div className="p-4 bg-gray-50 border-t border-gray-200 text-center text-xs text-gray-500">
-              <p>ShopHub © 2026. All rights reserved.</p>
+              <p>BuySeller © 2026. All rights reserved.</p>
             </div>
           </motion.div>
         )}
