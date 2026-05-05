@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'https://buysellerbackend-com.onrender.com',
+        target: 'https://buy-seller-backend-com.vercel.app/',
         changeOrigin: true,
       },
     },
