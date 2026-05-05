@@ -1,7 +1,8 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_URL = import.meta.env.VITE_API_URL || "https://buysellerbackend-com.onrender.com/api" ;
+// const API_URL = "https://buysellerbackend-com.onrender.com/api" ;
+const API_URL = "https://buy-seller-backend-com.vercel.app/api" ;
 
 const api = axios.create({
   baseURL: API_URL,
