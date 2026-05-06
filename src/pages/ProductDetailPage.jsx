@@ -735,6 +735,8 @@ const handleBuyNow = () => {
                         <label className="block text-sm font-medium mb-2">Review Title</label>
                         <input
                           type="text"
+                          id="reviewTitle"
+                          name="reviewTitle"
                           value={reviewForm.title}
                           onChange={(e) => setReviewForm({ ...reviewForm, title: e.target.value })}
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
@@ -745,6 +747,8 @@ const handleBuyNow = () => {
                         <label className="block text-sm font-medium mb-2">Your Review *</label>
                         <textarea
                           rows="4"
+                          id="reviewComment"
+                          name="reviewComment"
                           value={reviewForm.comment}
                           onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"

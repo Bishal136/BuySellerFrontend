@@ -144,6 +144,8 @@ const Header = () => {
                 </select> */}
                 <input
                   type="text"
+                  id="desktopSearchInput"
+                  name="desktopSearchInput"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search for products, brands and more..."
@@ -332,6 +334,8 @@ const Header = () => {
                 <form onSubmit={handleSearch} className="py-3 border-t mt-3 border-gray-100 relative">
                   <input
                     type="text"
+                    id="mobileSearchInput"
+                    name="mobileSearchInput"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search products..."

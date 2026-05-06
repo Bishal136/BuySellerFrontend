@@ -240,9 +240,9 @@ const handleCheckout = () => {
     stock: item.stock,
     brand: item.brand,
     // Critical: Include seller information
-    sellerId: item.sellerId || item.seller?._id,
-    sellerName: item.sellerName || item.seller?.storeName || 'Seller',
-    seller: item.seller || item.sellerId,
+    sellerId: item.sellerId || item.seller?._id || item.seller || 'default_seller',
+    sellerName: item.sellerName || item.seller?.storeName || 'Default Seller',
+    seller: item.seller || item.sellerId || 'default_seller',
     // Include any other relevant fields
     color: item.color,
     size: item.size,
@@ -309,6 +309,8 @@ const handleCheckout = () => {
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
+                  id="selectAll"
+                  name="selectAll"
                   checked={selectAll && selectedItems.length === items.length}
                   onChange={toggleSelectAll}
                   className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
@@ -340,6 +342,8 @@ const handleCheckout = () => {
                     <div className="flex items-center gap-3">
                       <input
                         type="checkbox"
+                        id={`select-seller-${sellerId}`}
+                        name={`select-seller-${sellerId}`}
                         checked={allSellerSelected}
                         ref={(el) => {
                           if (el) el.indeterminate = !allSellerSelected && someSellerSelected;
@@ -378,6 +382,8 @@ const handleCheckout = () => {
                             <div className="flex-shrink-0">
                               <input
                                 type="checkbox"
+                                id={`select-item-${item._id}`}
+                                name={`select-item-${item._id}`}
                                 checked={selectedItems.includes(item._id)}
                                 onChange={() => toggleItemSelection(item._id)}
                                 className="w-5 h-5 rounded border-gray-300 text-primary-600 mt-6"
@@ -530,6 +536,8 @@ const handleCheckout = () => {
                   <div className="flex-1 relative">
                     <input
                       type="text"
+                      id="cartCouponCode"
+                      name="cartCouponCode"
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
                       placeholder="Enter Voucher Code"

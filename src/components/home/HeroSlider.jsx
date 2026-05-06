@@ -112,7 +112,7 @@ const HeroSlider = () => {
   }, [next, current]);
 
   return (
-    <div className="relative overflow-hidden h-125 md:h-150 mx-20 rounded-xl shadow-lg">
+    <div className="relative overflow-hidden h-125 md:h-150 md:mx-20 md:rounded-xl shadow-lg">
       <AnimatePresence mode="wait">
         <Slide slide={SLIDES[current]} />
       </AnimatePresence>

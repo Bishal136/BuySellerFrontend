@@ -612,6 +612,8 @@ const OrderDetailsPage = () => {
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-2">Reason for cancellation</label>
                 <textarea
+                  id="cancelReason"
+                  name="cancelReason"
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
                   placeholder="Please tell us why you're cancelling..."
@@ -671,6 +673,8 @@ const OrderDetailsPage = () => {
                 <div>
                   <label className="block text-sm font-medium mb-2">Reason for return *</label>
                   <select
+                    id="returnReason"
+                    name="returnReason"
                     value={returnReason}
                     onChange={(e) => setReturnReason(e.target.value)}
                     className="input"
@@ -689,6 +693,8 @@ const OrderDetailsPage = () => {
                   <label className="block text-sm font-medium mb-2">Quantity</label>
                   <input
                     type="number"
+                    id="returnQuantity"
+                    name="returnQuantity"
                     value={returnQuantity}
                     onChange={(e) => setReturnQuantity(parseInt(e.target.value))}
                     min="1"
@@ -700,6 +706,8 @@ const OrderDetailsPage = () => {
                 <div>
                   <label className="block text-sm font-medium mb-2">Additional Comments</label>
                   <textarea
+                    id="returnComments"
+                    name="returnComments"
                     value={returnComments}
                     onChange={(e) => setReturnComments(e.target.value)}
                     placeholder="Any additional information..."

@@ -445,6 +445,24 @@ const CheckoutPage = () => {
                         </button>
                       </div>
                     </div>
+                  ) : showAddressForm ? (
+                    <div className="space-y-4 border p-4 rounded-lg bg-gray-50">
+                      <h4 className="font-semibold mb-2">Add New Address</h4>
+                      <input type="text" id="newAddressName" name="newAddressName" placeholder="Full Name" className="w-full p-2 border rounded outline-none focus:border-primary-500" value={newAddress.name} onChange={(e) => setNewAddress({...newAddress, name: e.target.value})} />
+                      <input type="text" id="newAddressStreet" name="newAddressStreet" placeholder="Street Address" className="w-full p-2 border rounded outline-none focus:border-primary-500" value={newAddress.street} onChange={(e) => setNewAddress({...newAddress, street: e.target.value})} />
+                      <div className="grid grid-cols-2 gap-4">
+                        <input type="text" id="newAddressCity" name="newAddressCity" placeholder="City" className="w-full p-2 border rounded outline-none focus:border-primary-500" value={newAddress.city} onChange={(e) => setNewAddress({...newAddress, city: e.target.value})} />
+                        <input type="text" id="newAddressState" name="newAddressState" placeholder="State/Division" className="w-full p-2 border rounded outline-none focus:border-primary-500" value={newAddress.state} onChange={(e) => setNewAddress({...newAddress, state: e.target.value})} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <input type="text" id="newAddressPostalCode" name="newAddressPostalCode" placeholder="Postal Code" className="w-full p-2 border rounded outline-none focus:border-primary-500" value={newAddress.postalCode} onChange={(e) => setNewAddress({...newAddress, postalCode: e.target.value})} />
+                        <input type="text" id="newAddressPhone" name="newAddressPhone" placeholder="Phone Number" className="w-full p-2 border rounded outline-none focus:border-primary-500" value={newAddress.phone} onChange={(e) => setNewAddress({...newAddress, phone: e.target.value})} />
+                      </div>
+                      <div className="flex gap-2 justify-end mt-4">
+                        <button onClick={() => setShowAddressForm(false)} className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-100 transition-colors">Cancel</button>
+                        <button onClick={handleAddAddress} className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors">Save Address</button>
+                      </div>
+                    </div>
                   ) : (
                     <div className="space-y-3">
                       {addresses.map((addr, idx) => (
