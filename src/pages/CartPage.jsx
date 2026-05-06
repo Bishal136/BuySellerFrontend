@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
+import api from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiShoppingBag,
@@ -177,18 +178,8 @@ const CartPage = () => {
     setApplyingCoupon(true);
     try {
       if (isGuestCart) {
-        const validCoupons = {
-          'SAVE10': { discountType: 'percentage', discountValue: 10, maxDiscount: 500, minPurchase: 5000 },
-          'SAVE20': { discountType: 'percentage', discountValue: 20, maxDiscount: 1000, minPurchase: 10000 },
-          'FLAT50': { discountType: 'fixed', discountValue: 50, minPurchase: 20000 },
-          'WELCOME': { discountType: 'percentage', discountValue: 15, maxDiscount: 300, minPurchase: 0 }
-        };
-
-        const coupon = validCoupons[couponCode.toUpperCase()];
-        if (!coupon) {
-          toast.error('Invalid coupon code');
-          return;
-        }
+        const response = await api.get(`/cart/coupon/validate/${couponCode}`);
+        const coupon = response.data.coupon;
 
         if (selectedSubtotal < coupon.minPurchase) {
           toast.error(`Minimum purchase of ${formatBDT(coupon.minPurchase)} required`);
