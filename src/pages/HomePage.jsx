@@ -85,7 +85,7 @@ const HomePage = () => {
 
       {/* Features Strip */}
       <section className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-2 gap-3 rounded-xl border border-gray-200 bg-white p-4 md:grid-cols-4 shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
           {features.map((feature, index) => (
             <motion.div
               key={index}
@@ -144,7 +144,7 @@ const HomePage = () => {
               </div>
             </div>
             <div className="bg-white p-4">
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {flashSaleProducts.map((product) => (
                   <ProductCard key={product._id} product={product} featured />
                 ))}
@@ -164,7 +164,7 @@ const HomePage = () => {
             See all
           </Link>
         </div>
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {categoriesToShowGrid.map((category, index) => (
             <CategoryCard key={category._id} category={category} index={index} />
           ))}
@@ -183,7 +183,7 @@ const HomePage = () => {
           </Link>
         </div>
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="bg-white rounded-xl shadow-sm p-4 animate-pulse">
                 <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
@@ -193,7 +193,7 @@ const HomePage = () => {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {featuredProducts.map((product) => (
               <ProductCard key={product._id} product={product} featured />
             ))}
@@ -203,12 +203,12 @@ const HomePage = () => {
 
       {/* Banner / Promo Section */}
       <section className="container mx-auto px-4 py-8">
-        <div className="relative overflow-hidden rounded-2xl bg-linear-to-r from-primary-600 to-primary-800 p-8 md:p-12">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-600 to-primary-800 p-6 sm:p-8 md:p-12">
           <div className="relative z-10 max-w-2xl">
             <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white mb-3">
               Limited Time Offer
             </span>
-            <h2 className="text-3xl font-extrabold text-white md:text-4xl mb-3">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white md:text-4xl mb-3">
               Summer Sale 2024
             </h2>
             <p className="text-white/90 mb-6">
@@ -239,7 +239,7 @@ const HomePage = () => {
           </Link>
         </div>
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="bg-white rounded-xl shadow-sm p-4 animate-pulse">
                 <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
@@ -249,7 +249,7 @@ const HomePage = () => {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {newArrivals.map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}
@@ -269,7 +269,7 @@ const HomePage = () => {
           </Link>
         </div>
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="bg-gray-50 rounded-xl shadow-sm p-4 animate-pulse">
                 <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
@@ -279,7 +279,7 @@ const HomePage = () => {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {bestSellers.map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}
