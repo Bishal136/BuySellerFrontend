@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
       '/api': {
 
         // target: 'http://localhost:5000/',
-        target: "https://buy-seller-backend-com.vercel.app/",
+        target: "https://buysellerbackend-com-ipb9.onrender.com",
 
         changeOrigin: true,
       },

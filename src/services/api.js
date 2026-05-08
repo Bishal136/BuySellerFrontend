@@ -1,7 +1,7 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_URL = "https://buy-seller-backend-com.vercel.app/api" ;
+const API_URL = "https://buysellerbackend-com-ipb9.onrender.com/api" ;
 // const API_URL = "http://localhost:5000/api" ;
 
 const api = axios.create({
