@@ -149,7 +149,7 @@ const HomePage = () => {
         </div>
       </section> */}
 
-      {/* Featured Products */}
+      {/* Featured Products
       <section className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -177,7 +177,7 @@ const HomePage = () => {
             ))}
           </div>
         )}
-      </section>
+      </section> */}
 
       {/* Banner / Promo Section */}
       {/* <section className="container mx-auto px-4 py-8">
@@ -209,7 +209,7 @@ const HomePage = () => {
       <section className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-extrabold text-gray-800">New Arrivals</h2>
+            <h2 className="text-2xl font-extrabold text-gray-800">Our Products</h2>
             <p className="text-sm text-gray-500 mt-1">Fresh from the market</p>
           </div>
           <Link to="/products?sort=newest" className="text-sm font-medium text-primary-600 hover:underline flex items-center gap-1">

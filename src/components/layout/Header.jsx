@@ -100,13 +100,13 @@ const Header = () => {
             {/* Logo */}
             <Link to="/" className="shrink-0 flex items-center gap-2">
               <div className="w-10 h-10 bg-linear-to-br  flex items-center justify-center text-white font-bold text-xl ">
-                <img 
+                {/* <img 
                 src={logo}
                 className=' h-full w-full rounded-full'
-                 />
+                 /> */}
               </div>
               
-              <span className="text-2xl font-sans font-medium bg-linear-to-r text-[#624f3e] bg-clip-text  hidden sm:block">
+              <span className="text-3xl font-serif font-bold bg-linear-to-r text-[#0B2E33] bg-clip-text ">
                 Easilia
               </span>
             </Link>
