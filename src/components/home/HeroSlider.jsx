@@ -115,7 +115,7 @@ const HeroSlider = () => {
     <div className="mx-2 rounded-2xl relative overflow-hidden h-50 md:h-150 md:mx-20 md:rounded-xl shadow-lg">
       <AnimatePresence mode="wait">
         <Slide slide={SLIDES[current]} />
-      </AnimatePresence>
+      </AnimatePresence> 
 
       <button
         onClick={prev}
@@ -123,7 +123,7 @@ const HeroSlider = () => {
         aria-label="Previous slide"
       >
         <FiChevronLeft className="w-6 h-6" />
-      </button>
+      </button> 
       <button
         onClick={next}
         className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 text-white p-2 rounded-full transition-all duration-200 hover:scale-110"
@@ -132,10 +132,10 @@ const HeroSlider = () => {
         <FiChevronRight className="w-6 h-6" />
       </button>
 
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
         {SLIDES.map((s, i) => (
           <button
-            key={s.id}
+            key={i}
             onClick={() => goTo(i)}
             className={`h-2 rounded-full transition-all duration-300 ${current === i ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/70 w-2'
               }`}

@@ -48,6 +48,10 @@
     100% { transform: scale(1); opacity: 1; }
   }
 }
+/* @theme {
+  --font-sans: "Helvetica", "Arial", "sans-serif";
+} */
+
 
 @layer base {
   * {

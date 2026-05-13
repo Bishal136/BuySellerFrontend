@@ -38,7 +38,7 @@ const Newsletter = () => {
   };
 
   return (
-    <section className="bg-gradient-to-r from-primary-600 to-primary-800 py-16">
+    <section className=" bg-[#4f7c82] py-10">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
           {/* Icon */}

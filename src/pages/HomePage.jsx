@@ -85,10 +85,10 @@ const HomePage = () => {
 
     
       {/* Flash Sale Section */}
-      {flashSaleProducts.length > 0 && (
+      {/* {flashSaleProducts.length > 0 && (
         <section className="container mx-auto px-4 py-8">
           <div className="rounded-xl overflow-hidden shadow-lg">
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-red-600 to-red-700 px-5 py-3 text-white">
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-linear-to-r from-red-600 to-red-700 px-5 py-3 text-white">
               <div className="flex items-center gap-2">
                 <FiZap className="h-6 w-6 fill-yellow-300 text-yellow-300" />
                 <h2 className="text-lg font-extrabold uppercase tracking-wide md:text-xl">
@@ -122,7 +122,7 @@ const HomePage = () => {
               </div>
             </div>
             <div className="bg-white p-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2  sm:grid-cols-4 lg:grid-cols-5 gap-4">
                 {flashSaleProducts.map((product) => (
                   <ProductCard key={product._id} product={product} featured />
                 ))}
@@ -130,7 +130,7 @@ const HomePage = () => {
             </div>
           </div>
         </section>
-      )}
+      )} */}
 
       {/* Categories Section - Grid View
       <section className="container mx-auto px-4 py-8">
@@ -180,7 +180,7 @@ const HomePage = () => {
       </section>
 
       {/* Banner / Promo Section */}
-      <section className="container mx-auto px-4 py-8">
+      {/* <section className="container mx-auto px-4 py-8">
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-600 to-primary-800 p-6 sm:p-8 md:p-12">
           <div className="relative z-10 max-w-2xl">
             <span className="inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white mb-3">
@@ -199,11 +199,11 @@ const HomePage = () => {
               Shop Now <FiArrowRight />
             </Link>
           </div>
-          {/* Decorative circles */}
-          <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
+          
+           <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
           <div className="absolute right-20 bottom-0 w-32 h-32 bg-white/5 rounded-full"></div>
         </div>
-      </section>
+      </section> */}
 
       {/* New Arrivals */}
       <section className="container mx-auto px-4 py-8">

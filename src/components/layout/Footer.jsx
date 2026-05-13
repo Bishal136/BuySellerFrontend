@@ -3,7 +3,7 @@ import { FiFacebook, FiTwitter, FiInstagram, FiGithub, FiMail, FiPhone, FiMapPin
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-gray-300">
+    <footer className="bg-[#0b2e33] text-gray-300">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About */}
@@ -73,7 +73,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} ShopHub. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} BuySeller. All rights reserved.</p>
         </div>
       </div>
     </footer>
