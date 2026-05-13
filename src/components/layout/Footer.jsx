@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About */}
           <div>
-            <h3 className="text-xl font-bold text-white mb-4">ShopHub</h3>
+            <h3 className="text-xl font-bold text-white mb-4">BuySeller</h3>
             <p className="text-sm">
               Your one-stop destination for all your shopping needs. 
               Quality products, best prices, and fast delivery.

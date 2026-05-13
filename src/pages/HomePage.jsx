@@ -83,29 +83,7 @@ const HomePage = () => {
       {/* Hero Slider */}
       <HeroSlider />
 
-      {/* Features Strip */}
-      <section className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          {features.map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="flex items-center gap-3"
-            >
-              <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${feature.color}`}>
-                <feature.icon className={`h-5 w-5 ${feature.iconColor}`} />
-              </div>
-              <div className="min-w-0">
-                <div className="text-sm font-bold text-gray-800">{feature.title}</div>
-                <div className="truncate text-xs text-gray-500">{feature.description}</div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
+    
       {/* Flash Sale Section */}
       {flashSaleProducts.length > 0 && (
         <section className="container mx-auto px-4 py-8">
@@ -154,7 +132,7 @@ const HomePage = () => {
         </section>
       )}
 
-      {/* Categories Section - Grid View */}
+      {/* Categories Section - Grid View
       <section className="container mx-auto px-4 py-8">
         <div className="mb-5 flex items-end justify-between">
           <h2 className="text-xl font-extrabold text-gray-800 md:text-2xl">
@@ -169,7 +147,7 @@ const HomePage = () => {
             <CategoryCard key={category._id} category={category} index={index} />
           ))}
         </div>
-      </section>
+      </section> */}
 
       {/* Featured Products */}
       <section className="container mx-auto px-4 py-8">
@@ -288,7 +266,31 @@ const HomePage = () => {
       </section>
 
       {/* Newsletter */}
-      {/* <Newsletter /> */}
+      <Newsletter />
+
+        {/* Features Strip */}
+      <section className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+          {features.map((feature, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="flex items-center gap-3"
+            >
+              <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${feature.color}`}>
+                <feature.icon className={`h-5 w-5 ${feature.iconColor}`} />
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-bold text-gray-800">{feature.title}</div>
+                <div className="truncate text-xs text-gray-500">{feature.description}</div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
 
     </div>
   );

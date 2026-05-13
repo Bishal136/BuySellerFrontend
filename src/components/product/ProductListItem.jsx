@@ -59,7 +59,8 @@ const ProductListItem = ({ product }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={`/product/${product.slug || product._id}`} className="block">
-        <div className="flex flex-col md:flex-row">
+
+        <div className=" flex flex-col md:flex-row">
           {/* Image Section */}
           <div className="relative md:w-48 h-48 bg-gray-100 overflow-hidden">
             {!imageLoaded && (
@@ -189,6 +190,7 @@ const ProductListItem = ({ product }) => {
             </div>
           </div>
         </div>
+
       </Link>
     </motion.div>
   );

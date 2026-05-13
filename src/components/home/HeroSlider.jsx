@@ -112,7 +112,7 @@ const HeroSlider = () => {
   }, [next, current]);
 
   return (
-    <div className="relative overflow-hidden h-125 md:h-150 md:mx-20 md:rounded-xl shadow-lg">
+    <div className="mx-2 rounded-2xl relative overflow-hidden h-50 md:h-150 md:mx-20 md:rounded-xl shadow-lg">
       <AnimatePresence mode="wait">
         <Slide slide={SLIDES[current]} />
       </AnimatePresence>
@@ -137,9 +137,8 @@ const HeroSlider = () => {
           <button
             key={s.id}
             onClick={() => goTo(i)}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              current === i ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/70 w-2'
-            }`}
+            className={`h-2 rounded-full transition-all duration-300 ${current === i ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/70 w-2'
+              }`}
             aria-label={`Go to slide ${i + 1}`}
           />
         ))}
