@@ -2,9 +2,7 @@ import { useState, useEffect, useCallback, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import hero1 from '../../assets/hero-1.jpg';
-import hero2 from '../../assets/hero-2.jpg';
-import hero3 from '../../assets/hero-3.jpg';
+
 
 const SLIDES = [
   {
@@ -12,32 +10,36 @@ const SLIDES = [
     // title: 'Summer Sale 2024',
     // subtitle: 'Up to 50% Off',
     // description: 'Shop the latest summer collection with exclusive discounts',
-    image: hero1,
-    // cta: 'Shop Now',
+    image: "sl1.png",
+    // cta: 'App/public/sl2.png',
     // link: '/products',
     // color: 'from-primary-600 to-primary-800',
   },
   {
-    // id: 2,
-    // title: 'New Arrivals',
-    // subtitle: 'Fresh Collection',
-    // description: 'Discover the newest trends and styles',
-    image: hero2,
-    // cta: 'Explore Now',
-    // link: '/products?sort=newest',
-    // color: 'from-purple-600 to-purple-800',
+    id: 2,
+    image: "sl2.png",
+
   },
   {
     id: 3,
-    // title: 'Electronics Sale',
-    // subtitle: 'Best Deals',
-    // description: 'Latest gadgets at unbeatable prices',
-    image: hero3,
-    // cta: 'Buy Now',
-    // link: '/products?category=electronics',
-    // color: 'from-blue-600 to-blue-800',
+    image: "sl3.png",
+  }
+  ,
+  {
+    id: 4,
+
+    image: "sl4.png",
+
   },
+
+  {
+    id: 5,
+    image: "sl5.png",
+  }
 ];
+
+
+
 
 const AUTOPLAY_MS = 5000;
 const TOTAL = SLIDES.length;
@@ -49,6 +51,7 @@ const fadeUp = (delay) => ({
 });
 
 const Slide = memo(({ slide }) => (
+
   <motion.div
     key={slide.id}
     initial={{ opacity: 0, scale: 1.1 }}
@@ -115,7 +118,7 @@ const HeroSlider = () => {
     <div className="mx-2 mt-3 rounded-2xl relative overflow-hidden h-50 md:h-150 md:mx-20 md:rounded-xl shadow-lg">
       <AnimatePresence mode="wait">
         <Slide slide={SLIDES[current]} />
-      </AnimatePresence> 
+      </AnimatePresence>
 
       <button
         onClick={prev}
@@ -123,7 +126,7 @@ const HeroSlider = () => {
         aria-label="Previous slide"
       >
         <FiChevronLeft className="w-6 h-6" />
-      </button> 
+      </button>
       <button
         onClick={next}
         className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/50 text-white p-2 rounded-full transition-all duration-200 hover:scale-110"
@@ -132,7 +135,7 @@ const HeroSlider = () => {
         <FiChevronRight className="w-6 h-6" />
       </button>
 
-   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
         {SLIDES.map((s, i) => (
           <button
             key={i}
