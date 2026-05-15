@@ -349,7 +349,7 @@ const Header = () => {
             className="fixed top-0 left-0 w-4/5 max-w-sm h-full bg-white z-[70] shadow-2xl flex flex-col lg:hidden"
           >
             {/* Drawer Header */}
-            <div className="p-4 bg-gradient-to-r from-primary-600 to-primary-800 text-white flex justify-between items-center">
+            <div className="p-4 bg-linear-to-r from-primary-600 to-primary-800 text-white flex justify-between items-center">
               <div className="flex items-center gap-3">
                 {isAuthenticated ? (
                   <>
