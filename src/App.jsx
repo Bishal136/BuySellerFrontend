@@ -22,6 +22,7 @@ import OrdersPage from './pages/OrdersPage';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import WishlistPage from './pages/WishlistPage';
 import NotificationsPage from './pages/NotificationsPage';
+import ReviewsPage from './pages/ReviewsPage';
 
 // Seller Pages
 import SellerDashboard from './pages/seller/Dashboard';
@@ -72,6 +73,7 @@ function App() {
             <Route path="/orders/:id" element={<OrderDetailsPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/reviews" element={<ReviewsPage />} />
           </Route>
 
           {/* Seller Registration - Separate route */}

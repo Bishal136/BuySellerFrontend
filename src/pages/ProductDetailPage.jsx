@@ -17,6 +17,8 @@ import { addToWishlist } from '../redux/slices/authSlice';
 import api from '../services/api';
 import { formatBDT, formatNumber, calculateDiscount } from '../utils/currency';
 import ProductCard from '../components/product/ProductCard';
+import ProductReviews from '../components/reviews/ProductReviews';
+import YouTubeEmbed from '../components/common/YouTubeEmbed';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -35,7 +37,6 @@ const ProductDetailPage = () => {
   // UI States
   const [activeTab, setActiveTab] = useState('description');
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const [showReviewForm, setShowReviewForm] = useState(false);
   const [showSellerInfo, setShowSellerInfo] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [buyingNow, setBuyingNow] = useState(false);
@@ -47,8 +48,6 @@ const ProductDetailPage = () => {
     total: 0,
     distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
   });
-  const [reviewForm, setReviewForm] = useState({ rating: 5, title: '', comment: '' });
-  const [submittingReview, setSubmittingReview] = useState(false);
 
   // Zoom States
   const [showZoomModal, setShowZoomModal] = useState(false);
@@ -172,33 +171,6 @@ const handleBuyNow = () => {
     }
     await dispatch(addToWishlist(product._id));
     toast.success('Added to wishlist!');
-  };
-
-  const handleSubmitReview = async () => {
-    if (!isAuthenticated) {
-      toast.error('Please login to submit a review');
-      navigate('/login');
-      return;
-    }
-
-    if (!reviewForm.comment.trim()) {
-      toast.error('Please write a review');
-      return;
-    }
-
-    setSubmittingReview(true);
-    try {
-      await api.post(`/products/${product._id}/reviews`, reviewForm);
-      toast.success('Review submitted successfully!');
-      setShowReviewForm(false);
-      setReviewForm({ rating: 5, title: '', comment: '' });
-      fetchProduct();
-    } catch (error) {
-      console.error('Review submission error:', error.response?.data);
-      toast.error(error.response?.data?.message || 'Failed to submit review');
-    } finally {
-      setSubmittingReview(false);
-    }
   };
 
   // Zoom handlers
@@ -340,6 +312,14 @@ const handleBuyNow = () => {
                       )}
                     </button>
                   ))}
+                </div>
+              )}
+              
+              {/* YouTube Video Embed */}
+              {product.youtubeVideoId && (
+                <div className="mt-6">
+                  <h3 className="font-semibold mb-3">Product Video</h3>
+                  <YouTubeEmbed embedId={product.youtubeVideoId} />
                 </div>
               )}
             </div>
@@ -653,183 +633,7 @@ const handleBuyNow = () => {
 
             {/* Reviews Tab */}
             {activeTab === 'reviews' && (
-              <div>
-                {/* Review Stats Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                  <div className="text-center p-6 bg-gray-50 rounded-lg">
-                    <div className="text-5xl font-bold text-red-600 mb-2">
-                      {reviewStats.average.toFixed(1)}
-                    </div>
-                    <div className="flex justify-center mb-2">
-                      {[...Array(5)].map((_, i) => (
-                        <FiStar
-                          key={i}
-                          className={`w-5 h-5 ${i < Math.floor(reviewStats.average)
-                              ? 'text-yellow-400 fill-current'
-                              : 'text-gray-300'
-                            }`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-gray-500">Based on {reviewStats.total} reviews</p>
-                  </div>
-
-                  {/* Rating Distribution */}
-                  <div className="space-y-2">
-                    {[5, 4, 3, 2, 1].map((rating) => {
-                      const count = reviewStats.distribution?.[rating] || 0;
-                      const percentage = reviewStats.total > 0 ? (count / reviewStats.total) * 100 : 0;
-                      return (
-                        <div key={rating} className="flex items-center gap-2">
-                          <div className="w-12 text-sm">{rating} ★</div>
-                          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-yellow-400 rounded-full"
-                              style={{ width: `${percentage}%` }}
-                            />
-                          </div>
-                          <div className="w-12 text-sm text-gray-500">{count}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Write Review Button */}
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-semibold">Customer Reviews</h3>
-                  <button
-                    onClick={() => setShowReviewForm(!showReviewForm)}
-                    className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
-                  >
-                    Write a Review
-                  </button>
-                </div>
-
-                {/* Review Form */}
-                {showReviewForm && (
-                  <div className="mb-8 p-6 bg-gray-50 rounded-lg">
-                    <h4 className="font-semibold mb-4">Write Your Review</h4>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Rating</label>
-                        <div className="flex gap-2">
-                          {[1, 2, 3, 4, 5].map((rating) => (
-                            <button
-                              key={rating}
-                              type="button"
-                              onClick={() => setReviewForm({ ...reviewForm, rating })}
-                              className="focus:outline-none"
-                            >
-                              <FiStar
-                                className={`w-6 h-6 ${rating <= reviewForm.rating
-                                    ? 'text-yellow-400 fill-current'
-                                    : 'text-gray-300'
-                                  }`}
-                              />
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Review Title</label>
-                        <input
-                          type="text"
-                          id="reviewTitle"
-                          name="reviewTitle"
-                          value={reviewForm.title}
-                          onChange={(e) => setReviewForm({ ...reviewForm, title: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                          placeholder="Summarize your experience"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Your Review *</label>
-                        <textarea
-                          rows="4"
-                          id="reviewComment"
-                          name="reviewComment"
-                          value={reviewForm.comment}
-                          onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                          placeholder="Share your experience with this product..."
-                        />
-                      </div>
-                      <div className="flex gap-3">
-                        <button
-                          onClick={handleSubmitReview}
-                          disabled={submittingReview}
-                          className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-                        >
-                          {submittingReview ? 'Submitting...' : 'Submit Review'}
-                        </button>
-                        <button
-                          onClick={() => setShowReviewForm(false)}
-                          className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Reviews List */}
-                {reviews.length > 0 ? (
-                  <div className="space-y-6">
-                    {reviews.map((review) => (
-                      <div key={review._id} className="border-b pb-6">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                              <span className="text-red-600 font-semibold">
-                                {review.user?.name?.[0]?.toUpperCase() ?? '?'}
-                              </span>
-                            </div>
-                            <div>
-                              <p className="font-semibold">{review.user?.name ?? 'Anonymous'}</p>
-                              <p className="text-xs text-gray-500">
-                                {new Date(review.createdAt).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <FiStar
-                                key={i}
-                                className={`w-4 h-4 ${i < review.rating
-                                    ? 'text-yellow-400 fill-current'
-                                    : 'text-gray-300'
-                                  }`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        {review.title && (
-                          <h4 className="font-semibold mt-2">{review.title}</h4>
-                        )}
-                        <p className="text-gray-600 mt-1">{review.comment}</p>
-                        {review.verifiedPurchase && (
-                          <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
-                            <FiCheck className="w-3 h-3" />
-                            Verified Purchase
-                          </p>
-                        )}
-                        {review.helpful > 0 && (
-                          <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                            <FiThumbsUp className="w-3 h-3" />
-                            <span>{review.helpful} people found this helpful</span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-center py-8">
-                    No reviews yet. Be the first to review this product!
-                  </p>
-                )}
-              </div>
+              <ProductReviews productId={product._id} />
             )}
           </div>
         </div>

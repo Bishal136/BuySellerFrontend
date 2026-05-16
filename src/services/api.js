@@ -1,8 +1,8 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-// const API_URL = "https://buysellerbackend-com-ipb9.onrender.com/api" ;
-const API_URL = "http://localhost:5000/api" ;
+const API_URL = "https://buysellerbackend-com-ipb9.onrender.com/api" ;
+// const API_URL = "http://localhost:5000/api" ;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -26,6 +26,9 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     } else {
       console.log('No token found for request:', config.url);
+    }
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
     }
     
     return config;

@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { 
   FiShoppingCart, FiUser, FiSearch, FiMenu, FiX, FiHeart, 
   FiHome, FiPackage, FiShoppingBag, FiBarChart2, FiSettings, 
-  FiPhoneCall, FiMail, FiChevronDown, FiLogOut, FiBell, FiTrendingUp, FiClock
+  FiPhoneCall, FiMail, FiChevronDown, FiLogOut, FiBell, FiTrendingUp, FiClock, FiStar
 } from 'react-icons/fi';
 import { logout } from '../../redux/slices/authSlice';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -412,6 +412,11 @@ const Header = () => {
                         <Link to="/orders" className="flex items-center gap-3 px-5 py-2.5 hover:bg-gray-50 text-gray-700 hover:text-primary-600 transition-colors">
                           <FiPackage className="w-5 h-5" />
                           <span className="font-medium">My Orders</span>
+                        </Link>
+                        
+                        <Link to="/reviews" className="flex items-center gap-3 px-5 py-2.5 hover:bg-gray-50 text-gray-700 hover:text-primary-600 transition-colors">
+                          <FiStar className="w-5 h-5" />
+                          <span className="font-medium">My Reviews</span>
                         </Link>
                         
                         {user?.role === 'customer' && (

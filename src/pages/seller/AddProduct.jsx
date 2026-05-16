@@ -33,13 +33,31 @@ const AddProduct = () => {
     status: 'draft',
     seoTitle: '',
     seoDescription: '',
-    seoKeywords: []
+    seoKeywords: [],
+    youtubeVideoId: ''
   });
 
   const [variants, setVariants] = useState([]);
   const [specs, setSpecs] = useState([{ key: '', value: '' }]);
   const [tagInput, setTagInput] = useState('');
   const [keywordInput, setKeywordInput] = useState('');
+  const [videoUrlInput, setVideoUrlInput] = useState('');
+
+  const extractYoutubeId = (url) => {
+    if (!url) return '';
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[7].length === 11) ? match[7] : '';
+  };
+
+  const handleVideoUrlChange = (e) => {
+    const url = e.target.value;
+    setVideoUrlInput(url);
+    const id = extractYoutubeId(url);
+    if (id || url === '') {
+      setFormData(prev => ({ ...prev, youtubeVideoId: id }));
+    }
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -330,9 +348,43 @@ const AddProduct = () => {
               </label>
             </div>
             
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 mt-2">
               Recommended: Upload high-quality images (JPEG, PNG, GIF). First image will be the thumbnail.
             </p>
+          </div>
+
+          {/* Product Video */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-4">Product Video</h2>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">YouTube Video URL</label>
+              <input
+                type="text"
+                value={videoUrlInput}
+                onChange={handleVideoUrlChange}
+                className="input"
+                placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+              />
+              {videoUrlInput && !formData.youtubeVideoId && (
+                <p className="text-red-500 text-xs mt-1">Invalid YouTube URL. Please enter a valid URL.</p>
+              )}
+            </div>
+            
+            {formData.youtubeVideoId && (
+              <div className="mt-4 border rounded-lg p-2 bg-gray-50">
+                <p className="text-sm font-medium mb-2">Video Preview</p>
+                <div className="relative w-full overflow-hidden" style={{ paddingTop: '56.25%' }}>
+                  <iframe 
+                    className="absolute top-0 left-0 w-full h-full rounded"
+                    src={`https://www.youtube.com/embed/${formData.youtubeVideoId}`} 
+                    title="YouTube video player" 
+                    frameBorder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowFullScreen>
+                  </iframe>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Pricing & Inventory */}
