@@ -1,15 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { 
   FiShoppingCart, FiUser, FiSearch, FiMenu, FiX, FiHeart, 
   FiHome, FiPackage, FiShoppingBag, FiBarChart2, FiSettings, 
-  FiPhoneCall, FiMail, FiChevronDown, FiLogOut, FiBell
+  FiPhoneCall, FiMail, FiChevronDown, FiLogOut, FiBell, FiTrendingUp, FiClock
 } from 'react-icons/fi';
 import { logout } from '../../redux/slices/authSlice';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationBell from '../common/NotificationBell';
+import api from '../../services/api';
 import logo from "../../assets/logo.png";
+
+// Custom debounce function
+const useDebounce = (func, delay) => {
+  const [timer, setTimer] = useState(null);
+  
+  const debouncedFunction = useCallback((...args) => {
+    if (timer) clearTimeout(timer);
+    const newTimer = setTimeout(() => {
+      func(...args);
+    }, delay);
+    setTimer(newTimer);
+  }, [func, delay, timer]);
+  
+  return debouncedFunction;
+};
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,6 +34,13 @@ const Header = () => {
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   
+  // Search Autocomplete State
+  const [suggestions, setSuggestions] = useState([]);
+  const [popularSearches, setPopularSearches] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchRef = useRef(null);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,6 +54,59 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Fetch popular searches on mount
+  useEffect(() => {
+    const fetchPopularSearches = async () => {
+      try {
+        const { data } = await api.get('/search/analytics');
+        if (data.success) {
+          setPopularSearches(data.popular || []);
+        }
+      } catch (error) {
+        console.error('Error fetching popular searches', error);
+      }
+    };
+    fetchPopularSearches();
+  }, []);
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Debounced Search API Call
+  const fetchSuggestions = useDebounce(async (query) => {
+    if (!query.trim() || query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const { data } = await api.get(`/search/suggestions?q=${query}`);
+      if (data.success) {
+        setSuggestions(data.suggestions || []);
+      }
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  }, 300);
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    setShowSuggestions(true);
+    fetchSuggestions(value);
+  };
+
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -49,10 +125,22 @@ const Header = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/products?search=${searchQuery}`);
-      setSearchQuery('');
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setShowSuggestions(false);
       setIsMobileSearchOpen(false);
     }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    navigate(`/product/${suggestion.slug}`);
+    setShowSuggestions(false);
+    setSearchQuery('');
+  };
+
+  const handlePopularSearchClick = (query) => {
+    setSearchQuery(query);
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+    setShowSuggestions(false);
   };
 
   const cartItemCount = items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
@@ -112,25 +200,112 @@ const Header = () => {
             </Link>
 
             {/* Desktop Search Bar */}
-            <div className="hidden lg:flex flex-1 max-w-2xl mx-auto">
-              <form onSubmit={handleSearch} className="flex w-full relative group">
-             
-                <input
-                  type="text"
-                  id="desktopSearchInput"
-                  name="desktopSearchInput"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search for products, brands and more..."
-                  className="w-full h-12 pl-6 xl:pl-44 pr-14 border border-gray-300 rounded-full outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all text-sm group-hover:border-gray-400"
-                />
-                <button 
-                  type="submit" 
-                  className="absolute right-1 top-1 bottom-1 w-12 bg-[#0b2e33] hover:bg-primary-700 text-white rounded-full flex items-center justify-center transition-colors"
-                >
-                  <FiSearch className="w-5 h-5" />
-                </button>
-              </form>
+            <div className="hidden lg:flex flex-1 max-w-2xl mx-auto" ref={searchRef}>
+              <div className="flex w-full relative group">
+                <form onSubmit={handleSearch} className="w-full relative">
+                  <input
+                    type="text"
+                    id="desktopSearchInput"
+                    name="desktopSearchInput"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    onFocus={() => setShowSuggestions(true)}
+                    placeholder="Search for products, brands and more..."
+                    className="w-full h-12 pl-6 pr-14 border border-gray-300 rounded-full outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all text-sm group-hover:border-gray-400"
+                    autoComplete="off"
+                  />
+                  <button 
+                    type="submit" 
+                    className="absolute right-1 top-1 bottom-1 w-12 bg-[#0b2e33] hover:bg-primary-700 text-white rounded-full flex items-center justify-center transition-colors"
+                  >
+                    <FiSearch className="w-5 h-5" />
+                  </button>
+                </form>
+
+                {/* Autocomplete Dropdown */}
+                <AnimatePresence>
+                  {showSuggestions && (searchQuery.length >= 2 || popularSearches.length > 0) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 py-3 z-50 overflow-hidden"
+                    >
+                      {/* Popular Searches when input is empty */}
+                      {!searchQuery.trim() && popularSearches.length > 0 && (
+                        <div className="px-4">
+                          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <FiTrendingUp /> Popular Searches
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {popularSearches.map((term, i) => (
+                              <button
+                                key={i}
+                                onClick={() => handlePopularSearchClick(term)}
+                                className="px-3 py-1.5 bg-gray-50 hover:bg-primary-50 text-gray-700 hover:text-primary-700 text-sm rounded-full transition-colors border border-gray-100 hover:border-primary-200"
+                              >
+                                {term}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Search Results */}
+                      {searchQuery.trim().length >= 2 && (
+                        <div className="px-2">
+                          {isSearching ? (
+                            <div className="px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
+                              <div className="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                              Searching...
+                            </div>
+                          ) : suggestions.length > 0 ? (
+                            <div>
+                              <h4 className="px-3 pb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                Products matching "{searchQuery}"
+                              </h4>
+                              {suggestions.map((item) => (
+                                <button
+                                  key={item._id}
+                                  onClick={() => handleSuggestionClick(item)}
+                                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors text-left"
+                                >
+                                  <div className="w-10 h-10 bg-gray-100 rounded flex-shrink-0 overflow-hidden">
+                                    {item.images && item.images[0] ? (
+                                      <img src={item.images[0].url} alt={item.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                      <FiPackage className="w-5 h-5 m-auto text-gray-400 mt-2.5" />
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
+                                    <p className="text-xs text-primary-600 font-bold">${item.price}</p>
+                                  </div>
+                                </button>
+                              ))}
+                              <div className="mt-2 pt-2 border-t border-gray-100 px-2">
+                                <button
+                                  onClick={() => handleSearch({ preventDefault: () => {} })}
+                                  className="w-full py-2 text-sm text-center text-primary-600 hover:text-primary-800 font-medium transition-colors"
+                                >
+                                  View all results for "{searchQuery}"
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="px-4 py-4 text-center">
+                              <p className="text-gray-500 text-sm">No products found for "{searchQuery}"</p>
+                              <div className="mt-2 text-xs text-gray-400">
+                                Try checking your spelling or use more general terms
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
 
             {/* Action Icons */}

@@ -12,6 +12,7 @@ import CartPage from './pages/CartPage';
 import OTPLoginPage from './pages/OTPLoginPage';
 import RegisterPage from './pages/RegisterPage';
 import NotFoundPage from './pages/NotFoundPage';
+import AdvancedSearchPage from './pages/AdvancedSearchPage';
 
 // Customer Pages
 import CheckoutPage from './pages/CheckoutPage';
@@ -56,6 +57,7 @@ function App() {
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/products" element={<ProductListingPage />} />
+          <Route path="/search" element={<AdvancedSearchPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/login" element={<OTPLoginPage />} />

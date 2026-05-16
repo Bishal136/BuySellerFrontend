@@ -1,0 +1,78 @@
+Unused files (6)
+eslint.config.js                             
+src/components/common/OTPInput.jsx           
+src/components/product/ProtectedRoute.jsx    
+src/components/product/SearchAutocomplete.jsx
+src/components/product/SimpleImageGallery.jsx
+src/components/profile/AvatarUpload.jsx      
+Unused dependencies (2)
+jwt-decode    package.json:20:6
+lucide-react  package.json:21:6
+Unused devDependencies (3)
+@tailwindcss/postcss  package.json:34:6
+autoprefixer          package.json:37:6
+postcss               package.json:38:6
+Unused exports (61)
+resendOTP                           src/redux/slices/authSlice.js:90:14         
+changePassword                      src/redux/slices/authSlice.js:137:14        
+removeFromWishlist                  src/redux/slices/authSlice.js:163:14        
+fetchWishlist                       src/redux/slices/authSlice.js:176:14        
+getCurrentUser                      src/redux/slices/authSlice.js:219:14        
+clearError                          src/redux/slices/authSlice.js:461:16        
+updateUser                          src/redux/slices/authSlice.js:461:28        
+setAuthenticated                    src/redux/slices/authSlice.js:461:40        
+clearWishlist                       src/redux/slices/authSlice.js:461:58        
+setCartFromSync                     src/redux/slices/cartSlice.js:430:3         
+createPriceAlert                    src/redux/slices/notificationSlice.js:74:14 
+createStockAlert                    src/redux/slices/notificationSlice.js:87:14 
+getPriceAlerts                      src/redux/slices/notificationSlice.js:100:14
+getStockAlerts                      src/redux/slices/notificationSlice.js:113:14
+deletePriceAlert                    src/redux/slices/notificationSlice.js:126:14
+deleteStockAlert                    src/redux/slices/notificationSlice.js:139:14
+clearError                          src/redux/slices/notificationSlice.js:246:16
+addNewNotification                  src/redux/slices/notificationSlice.js:246:28
+updateUnreadCount                   src/redux/slices/notificationSlice.js:246:48
+createOrder                         src/redux/slices/orderSlice.js:4:14         
+fetchOrders                         src/redux/slices/orderSlice.js:16:14        
+fetchOrderById                      src/redux/slices/orderSlice.js:28:14        
+cancelOrder                         src/redux/slices/orderSlice.js:40:14        
+clearCurrentOrder                   src/redux/slices/orderSlice.js:125:16       
+clearError                          src/redux/slices/orderSlice.js:125:35       
+fetchProducts                       src/redux/slices/productSlice.js:4:14       
+fetchProductById                    src/redux/slices/productSlice.js:17:14      
+fetchRelatedProducts                src/redux/slices/productSlice.js:29:14      
+fetchCategories                     src/redux/slices/productSlice.js:41:14      
+setFilters                          src/redux/slices/productSlice.js:135:16     
+clearFilters                        src/redux/slices/productSlice.js:135:28     
+setPagination                       src/redux/slices/productSlice.js:135:42     
+clearProducts                       src/redux/slices/productSlice.js:135:57     
+setLoading                          src/redux/slices/uiSlice.js:72:3            
+toggleSidebar                       src/redux/slices/uiSlice.js:73:3            
+toggleSearch                        src/redux/slices/uiSlice.js:74:3            
+toggleCart                          src/redux/slices/uiSlice.js:75:3            
+openModal                           src/redux/slices/uiSlice.js:76:3            
+closeModal                          src/redux/slices/uiSlice.js:77:3            
+addNotification                     src/redux/slices/uiSlice.js:78:3            
+removeNotification                  src/redux/slices/uiSlice.js:79:3            
+markNotificationAsRead              src/redux/slices/uiSlice.js:80:3            
+toggleTheme                         src/redux/slices/uiSlice.js:81:3            
+default                   variable  src/redux/store.js:32:16                    
+formatPriceDecimal                  src/utils/currency.js:27:14                 
+formatPriceInteger                  src/utils/currency.js:39:14                 
+calculateSavings                    src/utils/currency.js:77:14                 
+default                             src/utils/currency.js:85:16                 
+generatePlaceholder                 src/utils/placeholder.js:2:14               
+PRODUCT_PLACEHOLDER                 src/utils/placeholder.js:8:14               
+CATEGORY_PLACEHOLDER                src/utils/placeholder.js:9:14               
+AVATAR_PLACEHOLDER                  src/utils/placeholder.js:10:14              
+generatePlaceholder                 src/utils/placeholderImages.js:12:14        
+PLACEHOLDER_IMAGE                   src/utils/placeholderImages.js:20:14        
+CATEGORY_PLACEHOLDER                src/utils/placeholderImages.js:22:14        
+AVATAR_PLACEHOLDER                  src/utils/placeholderImages.js:23:14        
+BANNER_PLACEHOLDER                  src/utils/placeholderImages.js:24:14        
+TRANSPARENT_PIXEL                   src/utils/placeholderImages.js:27:14        
+PRODUCT_PLACEHOLDER_ICON            src/utils/placeholderImages.js:30:14        
+DEFAULT_AVATAR                      src/utils/placeholderImages.js:33:14        
+default                             src/utils/placeholderImages.js:36:16        
+Duplicate exports (1)
+store|default  src/redux/store.js
